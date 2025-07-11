@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "SuperNotes",
-    "slug": "SuperNotes",
+    "slug": "supernotes",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -37,6 +37,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "dfaf9b46-d151-4633-a683-8777064b51c8"
+      }
+    },
+    "owner": "balantvl-org"
   }
 }
