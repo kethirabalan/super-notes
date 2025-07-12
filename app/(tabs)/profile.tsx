@@ -1,17 +1,12 @@
+import { useAuth } from '@/contexts/AuthContext';
+import { useNotes } from '@/contexts/NotesContext';
 import Entypo from '@expo/vector-icons/Entypo';
 import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Avatar, Card, Divider, List } from 'react-native-paper';
 
-const userStats = [
-  { label: 'Total Notes', value: '24', icon: 'text' as const },
-  { label: 'Favorites', value: '8', icon: 'heart' as const },
-  { label: 'Categories', value: '5', icon: 'folder' as const },
-  { label: 'Days Active', value: '12', icon: 'calendar' as const },
-];
-
 const settingsOptions = [
-  { title: 'Account Settings', icon:     'user' as const, subtitle: 'Manage your account' },
+  { title: 'Account Settings', icon: 'user' as const, subtitle: 'Manage your account' },
   { title: 'Appearance', icon: 'palette' as const, subtitle: 'Theme and display' },
   { title: 'Notifications', icon: 'bell' as const, subtitle: 'Push notifications' },
   { title: 'Privacy & Security', icon: 'lock' as const, subtitle: 'Data and privacy' },
@@ -21,6 +16,52 @@ const settingsOptions = [
 ];
 
 export default function ProfileScreen() {
+  const { user, userData, signOut } = useAuth();
+  const { notes, favoriteNotes, loading } = useNotes();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
+  // Calculate user stats
+  const userStats = [
+    { 
+      label: 'Total Notes', 
+      value: notes.length.toString(), 
+      icon: 'text' as const 
+    },
+    { 
+      label: 'Favorites', 
+      value: favoriteNotes.length.toString(), 
+      icon: 'heart' as const 
+    },
+    { 
+      label: 'Categories', 
+      value: [...new Set(notes.map(note => note.label))].length.toString(), 
+      icon: 'folder' as const 
+    },
+    { 
+      label: 'Days Active', 
+      value: userData?.createdAt ? 
+        Math.ceil((new Date().getTime() - new Date(userData.createdAt).getTime()) / (1000 * 60 * 60 * 24)).toString() : 
+        '1', 
+      icon: 'calendar' as const 
+    },
+  ];
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color="#6C63FF" />
+        <Text style={styles.loadingText}>Loading profile...</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Header */}
@@ -36,11 +77,11 @@ export default function ProfileScreen() {
         <View style={styles.userInfo}>
           <Avatar.Image 
             size={80} 
-            source={{ uri: 'https://randomuser.me/api/portraits/men/36.jpg' }} 
+            source={{ uri: userData?.avatar || user?.photoURL || 'https://randomuser.me/api/portraits/men/36.jpg' }} 
           />
           <View style={styles.userDetails}>
-            <Text style={styles.userName}>John Doe</Text>
-            <Text style={styles.userEmail}>john.doe@example.com</Text>
+            <Text style={styles.userName}>{userData?.name || user?.displayName || 'User'}</Text>
+            <Text style={styles.userEmail}>{userData?.email || user?.email || 'user@example.com'}</Text>
             <TouchableOpacity style={styles.editButton}>
               <Text style={styles.editButtonText}>Edit Profile</Text>
             </TouchableOpacity>
@@ -65,23 +106,23 @@ export default function ProfileScreen() {
       <Card style={styles.settingsCard}>
         <Text style={styles.sectionTitle}>Settings</Text>
         {settingsOptions.map((option, index) => (
-          <React.Fragment key={index}>
+           <View key={index}>
             <List.Item
               title={option.title}
               description={option.subtitle}
-              left={(props) => <Entypo name={option.icon} size={24} color="#6C6C80" style={{ marginLeft: 20}} />}
+              left={(props) => <Entypo name={option.icon} size={24} color="#6C6C80" style={{ marginRight: 8 }} />}
               right={(props) => <Entypo name="chevron-right" size={20} color="#B5B5B5" />}
               titleStyle={styles.settingTitle}
               descriptionStyle={styles.settingSubtitle}
               style={styles.settingItem}
             />
             {index < settingsOptions.length - 1 && <Divider />}
-          </React.Fragment>
+          </View> 
         ))}
       </Card>
 
       {/* Logout Button */}
-      <TouchableOpacity style={styles.logoutButton}>
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Entypo name="log-out" size={20} color="#FF6B6B" />
         <Text style={styles.logoutText}>Log Out</Text>
       </TouchableOpacity>
@@ -95,6 +136,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F9FB',
     paddingHorizontal: 18,
     paddingTop: 44,
+  },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#6C6C80',
   },
   header: {
     flexDirection: 'row',
@@ -211,6 +261,7 @@ const styles = StyleSheet.create({
   },
   settingItem: {
     paddingVertical: 4,
+    padding: 20,
   },
   settingTitle: {
     fontSize: 16,

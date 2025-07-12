@@ -1,15 +1,16 @@
 import { useAuth } from '@/contexts/AuthContext';
 import React from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Button, Card } from 'react-native-paper';
+import { Button, Card, Divider } from 'react-native-paper';
 
 export default function AuthScreen() {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signInWithGoogle } = useAuth();
   const [isLogin, setIsLogin] = React.useState(true);
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [name, setName] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const [googleLoading, setGoogleLoading] = React.useState(false);
 
   const handleAuth = async () => {
     if (!email.trim() || !password.trim()) {
@@ -33,6 +34,28 @@ export default function AuthScreen() {
       Alert.alert('Error', error.message || 'Authentication failed');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    try {
+      // For now, we'll show a placeholder implementation
+      // In a production app, you would integrate with Google Sign-In SDK
+      Alert.alert(
+        'Google Sign-In',
+        'Google Sign-In is configured but requires additional setup. Please use email/password for now.',
+        [{ text: 'OK' }]
+      );
+      
+      // Placeholder for actual Google Sign-In implementation
+      // const idToken = await getGoogleIdToken();
+      // await signInWithGoogle(idToken);
+    } catch (error: any) {
+      Alert.alert('Error', 'Google Sign-In failed. Please try again.');
+      console.error('Google Sign-In error:', error);
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -89,6 +112,27 @@ export default function AuthScreen() {
               <Text style={styles.authButtonText}>
                 {isLogin ? 'Sign In' : 'Sign Up'}
               </Text>
+            )}
+          </Button>
+
+          <View style={styles.dividerContainer}>
+            <Divider style={styles.divider} />
+            <Text style={styles.dividerText}>OR</Text>
+            <Divider style={styles.divider} />
+          </View>
+
+          <Button
+            mode="outlined"
+            onPress={handleGoogleSignIn}
+            disabled={googleLoading}
+            style={styles.googleButton}
+            contentStyle={styles.googleButtonContent}
+            icon="google"
+          >
+            {googleLoading ? (
+              <ActivityIndicator color="#6C63FF" />
+            ) : (
+              <Text style={styles.googleButtonText}>Continue with Google</Text>
             )}
           </Button>
           
@@ -166,6 +210,34 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#fff',
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  divider: {
+    flex: 1,
+    backgroundColor: '#E0E0E0',
+  },
+  dividerText: {
+    marginHorizontal: 16,
+    fontSize: 14,
+    color: '#6C6C80',
+    fontWeight: '500',
+  },
+  googleButton: {
+    borderColor: '#6C63FF',
+    borderWidth: 1,
+    borderRadius: 12,
+  },
+  googleButtonContent: {
+    paddingVertical: 8,
+  },
+  googleButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#6C63FF',
   },
   switchButton: {
     marginTop: 20,

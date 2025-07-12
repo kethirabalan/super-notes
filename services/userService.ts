@@ -3,7 +3,9 @@ import { User } from '@/types';
 import {
     createUserWithEmailAndPassword,
     User as FirebaseUser,
+    GoogleAuthProvider,
     onAuthStateChanged,
+    signInWithCredential,
     signInWithEmailAndPassword,
     signOut,
     updateProfile
@@ -44,6 +46,32 @@ export const userService = {
       return userCredential.user;
     } catch (error) {
       console.error('Error signing in:', error);
+      throw error;
+    }
+  },
+
+  // Sign in with Google
+  async signInWithGoogle(idToken: string): Promise<FirebaseUser> {
+    try {
+      const credential = GoogleAuthProvider.credential(idToken);
+      const userCredential = await signInWithCredential(auth, credential);
+      const user = userCredential.user;
+
+      // Check if user document exists, if not create it
+      const userDoc = await getDoc(doc(db, USERS_COLLECTION, user.uid));
+      if (!userDoc.exists()) {
+        await setDoc(doc(db, USERS_COLLECTION, user.uid), {
+          id: user.uid,
+          name: user.displayName || 'User',
+          email: user.email,
+          avatar: user.photoURL,
+          createdAt: new Date(),
+        });
+      }
+
+      return user;
+    } catch (error) {
+      console.error('Error signing in with Google:', error);
       throw error;
     }
   },
