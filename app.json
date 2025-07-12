@@ -56,13 +56,10 @@
             "useFrameworks": "static"
           }
         }
-      ],
-      [
-        "expo-auth-session",
-        {
-          "scheme": "supernotes"
-        }
       ]
+      // [
+      //   "expo-auth-session"
+      // ]
     ],
     "experiments": {
       "typedRoutes": true
