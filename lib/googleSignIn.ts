@@ -1,16 +1,39 @@
-// Google Sign-In Configuration
-// This file contains the configuration for Google Sign-In
+import { environment } from '../environments/environment';
 
 export const googleSignInConfig = {
-  // Replace with your actual Google Client ID
-  clientId: '1017757914937-sbmbjt255qp5k3qoa5i7u22fm015qqbl.apps.googleusercontent.com',
+  // Use environment-specific client ID
+  clientId: environment.production 
+    ? '1017757914937-sbmbjt255qp5k3qoa5i7u22fm015qqbl.apps.googleusercontent.com'
+    : '1017757914937-sbmbjt255qp5k3qoa5i7u22fm015qqbl.apps.googleusercontent.com',
   
   // Scopes for Google Sign-In
   scopes: ['openid', 'profile', 'email'],
   
-  // Redirect URI for web-based authentication
-  redirectUri: 'https://supernotes-4e70a.web.app/auth/callback',
+  // Redirect URI for Expo Auth Session
+  redirectUri: environment.production
+    ? 'https://auth.expo.io/@balantvl-org/supernotes'
+    : 'https://auth.expo.io/@balantvl-org/supernotes',
+  
+  // Additional configuration for production
+  ...(environment.production && {
+    // Production-specific settings
+    hostedDomain: '',
+    loginHint: '',
+    prompt: 'select_account'
+  })
 };
+
+// Google Sign-In error codes
+export const GOOGLE_SIGN_IN_ERRORS = {
+  SIGN_IN_CANCELLED: 'SIGN_IN_CANCELLED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  PLAY_SERVICES_NOT_AVAILABLE: 'PLAY_SERVICES_NOT_AVAILABLE',
+  SIGN_IN_REQUIRED: 'SIGN_IN_REQUIRED',
+  NETWORK_ERROR: 'NETWORK_ERROR',
+  DEVELOPER_ERROR: 'DEVELOPER_ERROR'
+} as const;
+
+export type GoogleSignInError = typeof GOOGLE_SIGN_IN_ERRORS[keyof typeof GOOGLE_SIGN_IN_ERRORS];
 
 // Google Sign-In implementation for React Native
 export const googleSignIn = {

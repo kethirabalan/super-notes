@@ -2,9 +2,9 @@ export interface Note {
   id: string;
   title: string;
   content: string;
-  preview: string;
-  label: string;
-  date: string;
+  preview?: string;
+  category: string;
+  tags: string[];
   image?: string;
   isFavorite: boolean;
   userId: string;

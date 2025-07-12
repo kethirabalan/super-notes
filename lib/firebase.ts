@@ -4,7 +4,7 @@ import { getFirestore } from 'firebase/firestore';
 import { environment } from '../environments/environment';
 
 const firebaseConfig = {
-  apiKey:  environment.firebase.apiKey,
+  apiKey: environment.firebase.apiKey,
   authDomain: environment.firebase.authDomain,
   projectId: environment.firebase.projectId,
   storageBucket: environment.firebase.storageBucket,
@@ -13,10 +13,22 @@ const firebaseConfig = {
   measurementId: environment.firebase.measurementId
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
+// Initialize Firebase services
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 
+// Connect to emulators in development
+if (!environment.production) {
+  try {
+    // Uncomment these lines if you want to use Firebase emulators in development
+    // connectAuthEmulator(auth, 'http://localhost:9099');
+    // connectFirestoreEmulator(db, 'localhost', 8080);
+  } catch (error) {
+    console.warn('Firebase emulator connection failed:', error);
+  }
+}
 
 export default app; 

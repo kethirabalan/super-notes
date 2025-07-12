@@ -94,8 +94,8 @@ export default function HomeScreen() {
                   <Text style={styles.noteTitle} numberOfLines={1}>{item.title}</Text>
                   <Text style={styles.notePreview} numberOfLines={2}>{item.preview}</Text>
                   <View style={styles.noteFooter}>
-                    <Text style={styles.noteLabel}>{item.label}</Text>
-                    <Text style={styles.noteDate}>{item.date}</Text>
+                    <Text style={styles.noteLabel}>{item.category}</Text>
+                    <Text style={styles.noteDate}>{item.createdAt.toLocaleDateString()}</Text>
                   </View>
                 </View>
               </View>

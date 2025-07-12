@@ -30,12 +30,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = userService.onAuthStateChange(async (firebaseUser) => {
+    const unsubscribe = userService.onAuthStateChanged(async (firebaseUser) => {
       setUser(firebaseUser);
       
       if (firebaseUser) {
         try {
-          const data = await userService.getUserData(firebaseUser.uid);
+          const data = await userService.getUserProfile(firebaseUser.uid);
           setUserData(data);
         } catch (error) {
           console.error('Error fetching user data:', error);
@@ -52,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signIn = async (email: string, password: string) => {
     try {
-      await userService.signIn(email, password);
+      await userService.signInWithEmail(email, password);
     } catch (error) {
       throw error;
     }
@@ -60,7 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = async (email: string, password: string, name: string) => {
     try {
-      await userService.signUp(email, password, name);
+      await userService.registerWithEmail(email, password, name);
     } catch (error) {
       throw error;
     }
@@ -86,7 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) throw new Error('No user logged in');
     
     try {
-      await userService.updateUserProfile(user.uid, updates);
+      await userService.updateProfile(user.uid, updates);
       if (userData) {
         setUserData({ ...userData, ...updates });
       }

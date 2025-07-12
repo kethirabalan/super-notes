@@ -1,211 +1,231 @@
-import { db } from '@/lib/firebase';
-import { Note, NoteFormData } from '@/types';
-import {
-    addDoc,
-    collection,
-    deleteDoc,
-    doc,
-    getDoc,
-    getDocs,
-    orderBy,
-    query,
-    serverTimestamp,
-    updateDoc,
-    where
-} from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, query, Timestamp, updateDoc, where } from 'firebase/firestore';
+import { globalErrorHandler } from '../lib/errorHandler';
+import { db } from '../lib/firebase';
+import { performanceMonitor } from '../lib/performance';
+import { Note } from '../types';
 
-const NOTES_COLLECTION = 'notes';
+export class NotesService {
+  private static instance: NotesService;
+  private readonly collectionName = 'notes';
 
-export const notesService = {
-  // Get all notes for a user
-  async getNotes(userId: string): Promise<Note[]> {
-    try {
-      const q = query(
-        collection(db, NOTES_COLLECTION),
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
-      );
-      
-      const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate() || new Date(),
-        updatedAt: doc.data().updatedAt?.toDate() || new Date(),
-      })) as Note[];
-    } catch (error) {
-      console.error('Error getting notes:', error);
-      throw error;
+  static getInstance(): NotesService {
+    if (!NotesService.instance) {
+      NotesService.instance = new NotesService();
     }
-  },
+    return NotesService.instance;
+  }
 
-  // Get favorite notes for a user
-  async getFavoriteNotes(userId: string): Promise<Note[]> {
+  async createNote(userId: string, note: Omit<Note, 'id' | 'createdAt' | 'updatedAt' | 'userId'>): Promise<string> {
+    performanceMonitor.startTimer('create_note');
+    
     try {
-      const q = query(
-        collection(db, NOTES_COLLECTION),
-        where('userId', '==', userId),
-        where('isFavorite', '==', true),
-        orderBy('createdAt', 'desc')
-      );
-      
-      const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate() || new Date(),
-        updatedAt: doc.data().updatedAt?.toDate() || new Date(),
-      })) as Note[];
-    } catch (error) {
-      console.error('Error getting favorite notes:', error);
-      throw error;
-    }
-  },
-
-  // Get notes by category
-  async getNotesByCategory(userId: string, category: string): Promise<Note[]> {
-    try {
-      const q = query(
-        collection(db, NOTES_COLLECTION),
-        where('userId', '==', userId),
-        where('label', '==', category),
-        orderBy('createdAt', 'desc')
-      );
-      
-      const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate() || new Date(),
-        updatedAt: doc.data().updatedAt?.toDate() || new Date(),
-      })) as Note[];
-    } catch (error) {
-      console.error('Error getting notes by category:', error);
-      throw error;
-    }
-  },
-
-  // Get a single note by ID
-  async getNote(noteId: string): Promise<Note | null> {
-    try {
-      const docRef = doc(db, NOTES_COLLECTION, noteId);
-      const docSnap = await getDoc(docRef);
-      
-      if (docSnap.exists()) {
-        return {
-          id: docSnap.id,
-          ...docSnap.data(),
-          createdAt: docSnap.data().createdAt?.toDate() || new Date(),
-          updatedAt: docSnap.data().updatedAt?.toDate() || new Date(),
-        } as Note;
-      } else {
-        return null;
-      }
-    } catch (error) {
-      console.error('Error getting note:', error);
-      throw error;
-    }
-  },
-
-  // Create a new note
-  async createNote(userId: string, noteData: NoteFormData): Promise<string> {
-    try {
-      const preview = noteData.content.substring(0, 100) + (noteData.content.length > 100 ? '...' : '');
-      const date = new Date().toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-
-      const docRef = await addDoc(collection(db, NOTES_COLLECTION), {
-        ...noteData,
-        preview,
-        date,
-        userId,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-
-      return docRef.id;
-    } catch (error) {
-      console.error('Error creating note:', error);
-      throw error;
-    }
-  },
-
-  // Update a note
-  async updateNote(noteId: string, noteData: Partial<NoteFormData>): Promise<void> {
-    try {
-      const docRef = doc(db, NOTES_COLLECTION, noteId);
-      
-      const updateData: any = {
-        ...noteData,
-        updatedAt: serverTimestamp(),
+      const noteData = {
+        ...note,
+        userId: userId,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now()
       };
 
-      // Update preview if content changed
-      if (noteData.content) {
-        updateData.preview = noteData.content.substring(0, 100) + (noteData.content.length > 100 ? '...' : '');
-      }
-
-      await updateDoc(docRef, updateData);
+      const docRef = await addDoc(collection(db, this.collectionName), noteData);
+      performanceMonitor.endTimer('create_note', { success: true, noteId: docRef.id });
+      return docRef.id;
     } catch (error) {
-      console.error('Error updating note:', error);
-      throw error;
+      const duration = performanceMonitor.endTimer('create_note', { success: false });
+      globalErrorHandler.logError(error as Error, 'NotesService.createNote');
+      throw new Error('Failed to create note. Please try again.');
     }
-  },
+  }
 
-  // Delete a note
-  async deleteNote(noteId: string): Promise<void> {
-    try {
-      const docRef = doc(db, NOTES_COLLECTION, noteId);
-      await deleteDoc(docRef);
-    } catch (error) {
-      console.error('Error deleting note:', error);
-      throw error;
-    }
-  },
-
-  // Toggle favorite status
-  async toggleFavorite(noteId: string, isFavorite: boolean): Promise<void> {
-    try {
-      const docRef = doc(db, NOTES_COLLECTION, noteId);
-      await updateDoc(docRef, {
-        isFavorite,
-        updatedAt: serverTimestamp(),
-      });
-    } catch (error) {
-      console.error('Error toggling favorite:', error);
-      throw error;
-    }
-  },
-
-  // Search notes
-  async searchNotes(userId: string, searchTerm: string): Promise<Note[]> {
+  async getNotes(userId: string): Promise<Note[]> {
+    performanceMonitor.startTimer('get_notes');
+    
     try {
       const q = query(
-        collection(db, NOTES_COLLECTION),
+        collection(db, this.collectionName),
         where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
+        orderBy('updatedAt', 'desc')
       );
-      
-      const querySnapshot = await getDocs(q);
-      const allNotes = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate() || new Date(),
-        updatedAt: doc.data().updatedAt?.toDate() || new Date(),
-      })) as Note[];
 
-      // Filter notes based on search term
-      return allNotes.filter(note => 
+      const querySnapshot = await getDocs(q);
+      const notes: Note[] = [];
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        notes.push({
+          id: doc.id,
+          title: data.title,
+          content: data.content,
+          category: data.category,
+          tags: data.tags || [],
+          isFavorite: data.isFavorite || false,
+          userId: data.userId,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date()
+        });
+      });
+
+      performanceMonitor.endTimer('get_notes', { success: true, count: notes.length });
+      return notes;
+    } catch (error) {
+      const duration = performanceMonitor.endTimer('get_notes', { success: false });
+      globalErrorHandler.logError(error as Error, 'NotesService.getNotes');
+      throw new Error('Failed to fetch notes. Please check your connection and try again.');
+    }
+  }
+
+  async getFavoriteNotes(userId: string): Promise<Note[]> {
+    performanceMonitor.startTimer('get_favorite_notes');
+    
+    try {
+      const q = query(
+        collection(db, this.collectionName),
+        where('userId', '==', userId),
+        where('isFavorite', '==', true),
+        orderBy('updatedAt', 'desc')
+      );
+
+      const querySnapshot = await getDocs(q);
+      const notes: Note[] = [];
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        notes.push({
+          id: doc.id,
+          title: data.title,
+          content: data.content,
+          category: data.category,
+          tags: data.tags || [],
+          isFavorite: data.isFavorite || false,
+          userId: data.userId,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date()
+        });
+      });
+
+      performanceMonitor.endTimer('get_favorite_notes', { success: true, count: notes.length });
+      return notes;
+    } catch (error) {
+      const duration = performanceMonitor.endTimer('get_favorite_notes', { success: false });
+      globalErrorHandler.logError(error as Error, 'NotesService.getFavoriteNotes');
+      throw new Error('Failed to fetch favorite notes. Please check your connection and try again.');
+    }
+  }
+
+  async updateNote(noteId: string, updates: Partial<Note>): Promise<void> {
+    performanceMonitor.startTimer('update_note');
+    
+    try {
+      const updateData = {
+        ...updates,
+        updatedAt: Timestamp.now()
+      };
+
+      await updateDoc(doc(db, this.collectionName, noteId), updateData);
+      performanceMonitor.endTimer('update_note', { success: true, noteId });
+    } catch (error) {
+      const duration = performanceMonitor.endTimer('update_note', { success: false });
+      globalErrorHandler.logError(error as Error, 'NotesService.updateNote');
+      throw new Error('Failed to update note. Please try again.');
+    }
+  }
+
+  async deleteNote(noteId: string): Promise<void> {
+    performanceMonitor.startTimer('delete_note');
+    
+    try {
+      await deleteDoc(doc(db, this.collectionName, noteId));
+      performanceMonitor.endTimer('delete_note', { success: true, noteId });
+    } catch (error) {
+      const duration = performanceMonitor.endTimer('delete_note', { success: false });
+      globalErrorHandler.logError(error as Error, 'NotesService.deleteNote');
+      throw new Error('Failed to delete note. Please try again.');
+    }
+  }
+
+  async toggleFavorite(noteId: string, isFavorite: boolean): Promise<void> {
+    performanceMonitor.startTimer('toggle_favorite');
+    
+    try {
+      await updateDoc(doc(db, this.collectionName, noteId), {
+        isFavorite,
+        updatedAt: Timestamp.now()
+      });
+      performanceMonitor.endTimer('toggle_favorite', { success: true, noteId, isFavorite });
+    } catch (error) {
+      const duration = performanceMonitor.endTimer('toggle_favorite', { success: false });
+      globalErrorHandler.logError(error as Error, 'NotesService.toggleFavorite');
+      throw new Error('Failed to update favorite status. Please try again.');
+    }
+  }
+
+  async searchNotes(userId: string, searchTerm: string): Promise<Note[]> {
+    performanceMonitor.startTimer('search_notes');
+    
+    try {
+      // Note: Firestore doesn't support full-text search natively
+      // In production, consider using Algolia, Elasticsearch, or similar
+      const allNotes = await this.getNotes(userId);
+      const filteredNotes = allNotes.filter(note => 
         note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        note.label.toLowerCase().includes(searchTerm.toLowerCase())
+        note.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
       );
+
+      performanceMonitor.endTimer('search_notes', { success: true, count: filteredNotes.length, searchTerm });
+      return filteredNotes;
     } catch (error) {
-      console.error('Error searching notes:', error);
-      throw error;
+      const duration = performanceMonitor.endTimer('search_notes', { success: false });
+      globalErrorHandler.logError(error as Error, 'NotesService.searchNotes');
+      throw new Error('Failed to search notes. Please try again.');
     }
-  },
-}; 
+  }
+
+  async getNotesByCategory(userId: string, category: string): Promise<Note[]> {
+    performanceMonitor.startTimer('get_notes_by_category');
+    
+    try {
+      const q = query(
+        collection(db, this.collectionName),
+        where('userId', '==', userId),
+        where('category', '==', category),
+        orderBy('updatedAt', 'desc')
+      );
+
+      const querySnapshot = await getDocs(q);
+      const notes: Note[] = [];
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        notes.push({
+          id: doc.id,
+          title: data.title,
+          content: data.content,
+          category: data.category,
+          tags: data.tags || [],
+          isFavorite: data.isFavorite || false,
+          userId: data.userId,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date()
+        });
+      });
+
+      performanceMonitor.endTimer('get_notes_by_category', { success: true, count: notes.length, category });
+      return notes;
+    } catch (error) {
+    const duration = performanceMonitor.endTimer('get_notes_by_category', { success: false });
+    globalErrorHandler.logError(error as Error, 'NotesService.getNotesByCategory');
+    throw new Error('Failed to fetch notes by category. Please check your connection and try again.');
+  }
+}
+}
+
+
+export const notesService = NotesService.getInstance();
+
+
+
+
+
+
+
+

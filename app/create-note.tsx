@@ -1,5 +1,4 @@
 import { useNotes } from '@/contexts/NotesContext';
-import { NoteFormData } from '@/types';
 import Entypo from '@expo/vector-icons/Entypo';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -32,10 +31,11 @@ export default function CreateNoteScreen() {
 
     setSaving(true);
     try {
-      const noteData: NoteFormData = {
+      const noteData = {
         title: title.trim(),
         content: content.trim(),
-        label: selectedCategory,
+        category: selectedCategory,
+        tags: [],
         isFavorite,
       };
 

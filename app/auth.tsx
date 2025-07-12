@@ -1,7 +1,13 @@
 import { useAuth } from '@/contexts/AuthContext';
+import { googleSignInConfig } from '@/lib/googleSignIn';
+import * as GoogleSignIn from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
 import React from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Button, Card, Divider } from 'react-native-paper';
+
+// Ensure WebBrowser redirects work properly
+WebBrowser.maybeCompleteAuthSession();
 
 export default function AuthScreen() {
   const { signIn, signUp, signInWithGoogle } = useAuth();
@@ -11,6 +17,13 @@ export default function AuthScreen() {
   const [name, setName] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [googleLoading, setGoogleLoading] = React.useState(false);
+
+  // Configure Google Sign-In
+  const [request, response, promptAsync] = GoogleSignIn.useAuthRequest({
+    clientId: googleSignInConfig.clientId,
+    scopes: googleSignInConfig.scopes,
+    redirectUri: googleSignInConfig.redirectUri,
+  });
 
   const handleAuth = async () => {
     if (!email.trim() || !password.trim()) {
@@ -40,24 +53,44 @@ export default function AuthScreen() {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     try {
-      // For now, we'll show a placeholder implementation
-      // In a production app, you would integrate with Google Sign-In SDK
-      Alert.alert(
-        'Google Sign-In',
-        'Google Sign-In is configured but requires additional setup. Please use email/password for now.',
-        [{ text: 'OK' }]
-      );
+      // Start Google Sign-In flow
+      const result = await promptAsync();
       
-      // Placeholder for actual Google Sign-In implementation
-      // const idToken = await getGoogleIdToken();
-      // await signInWithGoogle(idToken);
+      if (result?.type === 'success') {
+        // Extract the ID token from the response
+        const { id_token } = result.params;
+        
+        if (id_token) {
+          await signInWithGoogle(id_token);
+        } else {
+          throw new Error('No ID token received from Google');
+        }
+      } else if (result?.type === 'cancel') {
+        // User cancelled the sign-in
+        console.log('Google Sign-In cancelled by user');
+      } else {
+        throw new Error('Google Sign-In failed');
+      }
     } catch (error: any) {
-      Alert.alert('Error', 'Google Sign-In failed. Please try again.');
       console.error('Google Sign-In error:', error);
+      Alert.alert('Error', 'Google Sign-In failed. Please try again.');
     } finally {
       setGoogleLoading(false);
     }
   };
+
+  // Handle Google Sign-In response
+  React.useEffect(() => {
+    if (response?.type === 'success') {
+      const { id_token } = response.params;
+      if (id_token) {
+        signInWithGoogle(id_token).catch((error: any) => {
+          console.error('Error signing in with Google:', error);
+          Alert.alert('Error', 'Failed to sign in with Google. Please try again.');
+        });
+      }
+    }
+  }, [response]);
 
   return (
     <View style={styles.container}>
@@ -124,7 +157,7 @@ export default function AuthScreen() {
           <Button
             mode="outlined"
             onPress={handleGoogleSignIn}
-            disabled={googleLoading}
+            disabled={googleLoading || !request}
             style={styles.googleButton}
             contentStyle={styles.googleButtonContent}
             icon="google"

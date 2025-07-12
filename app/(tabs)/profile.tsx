@@ -41,7 +41,7 @@ export default function ProfileScreen() {
     },
     { 
       label: 'Categories', 
-      value: [...new Set(notes.map(note => note.label))].length.toString(), 
+      value: [...new Set(notes.map(note => note.category))].length.toString(), 
       icon: 'folder' as const 
     },
     { 

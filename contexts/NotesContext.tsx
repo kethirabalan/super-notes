@@ -10,7 +10,7 @@ interface NotesContextType {
   error: string | null;
   fetchNotes: () => Promise<void>;
   fetchFavoriteNotes: () => Promise<void>;
-  createNote: (noteData: NoteFormData) => Promise<string>;
+  createNote: (noteData: Omit<Note, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => Promise<string>;
   updateNote: (noteId: string, noteData: Partial<NoteFormData>) => Promise<void>;
   deleteNote: (noteId: string) => Promise<void>;
   toggleFavorite: (noteId: string, isFavorite: boolean) => Promise<void>;
@@ -67,7 +67,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  const createNote = async (noteData: NoteFormData): Promise<string> => {
+  const createNote = async (noteData: Omit<Note, 'id' | 'createdAt' | 'updatedAt' | 'userId'>): Promise<string> => {
     if (!user) throw new Error('No user logged in');
     
     setError(null);

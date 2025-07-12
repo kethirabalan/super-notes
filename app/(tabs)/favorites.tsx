@@ -91,8 +91,8 @@ export default function FavoritesScreen() {
                   </View>
                   <Text style={styles.notePreview} numberOfLines={2}>{item.preview}</Text>
                   <View style={styles.noteFooter}>
-                    <Text style={styles.noteLabel}>{item.label}</Text>
-                    <Text style={styles.noteDate}>{item.date}</Text>
+                    <Text style={styles.noteLabel}>{item.category}</Text>
+                    <Text style={styles.noteDate}>{item.createdAt.toLocaleDateString()}</Text>
                   </View>
                 </View>
               </View>

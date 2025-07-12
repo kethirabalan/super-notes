@@ -46,7 +46,7 @@ export default function ExploreScreen() {
     const categoryCounts: { [key: string]: number } = {};
     
     notes.forEach(note => {
-      categoryCounts[note.label] = (categoryCounts[note.label] || 0) + 1;
+      categoryCounts[note.category] = (categoryCounts[note.category] || 0) + 1;
     });
 
     return Object.entries(categoryCounts).map(([name, count]) => ({
@@ -130,8 +130,8 @@ export default function ExploreScreen() {
             <Text style={styles.noteTitle} numberOfLines={1}>{item.title}</Text>
             <Text style={styles.notePreview} numberOfLines={2}>{item.preview}</Text>
             <View style={styles.noteFooter}>
-              <Text style={styles.noteCategory}>{item.label}</Text>
-              <Text style={styles.noteDate}>{item.date}</Text>
+              <Text style={styles.noteCategory}>{item.category}</Text>
+              <Text style={styles.noteDate}>{item.createdAt.toLocaleDateString()}</Text>
             </View>
           </View>
         </View>
