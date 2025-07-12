@@ -11,7 +11,7 @@ const userStats = [
 ];
 
 const settingsOptions = [
-  { title: 'Account Settings', icon: 'user' as const, subtitle: 'Manage your account' },
+  { title: 'Account Settings', icon:     'user' as const, subtitle: 'Manage your account' },
   { title: 'Appearance', icon: 'palette' as const, subtitle: 'Theme and display' },
   { title: 'Notifications', icon: 'bell' as const, subtitle: 'Push notifications' },
   { title: 'Privacy & Security', icon: 'lock' as const, subtitle: 'Data and privacy' },
@@ -69,7 +69,7 @@ export default function ProfileScreen() {
             <List.Item
               title={option.title}
               description={option.subtitle}
-              left={(props) => <Entypo name={option.icon} size={24} color="#6C6C80" style={{ marginRight: 8 }} />}
+              left={(props) => <Entypo name={option.icon} size={24} color="#6C6C80" style={{ marginLeft: 20}} />}
               right={(props) => <Entypo name="chevron-right" size={20} color="#B5B5B5" />}
               titleStyle={styles.settingTitle}
               descriptionStyle={styles.settingSubtitle}

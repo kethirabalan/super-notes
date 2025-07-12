@@ -1,5 +1,5 @@
 import Entypo from '@expo/vector-icons/Entypo';
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Appbar } from 'react-native-paper';
@@ -22,6 +22,7 @@ export default function CreateNoteScreen() {
 
   return (
     <View style={styles.container}>
+     <Stack.Screen options={{ headerShown: false }} />
       {/* Header */}
       <Appbar.Header style={styles.header}>
         <Appbar.BackAction onPress={() => router.back()} />

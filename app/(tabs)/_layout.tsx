@@ -1,19 +1,17 @@
 import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import Entypo from '@expo/vector-icons/Entypo';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
 
 function TabBarIcon(props: {
-  name: React.ComponentProps<typeof IconSymbol>['name'];
+  name: React.ComponentProps<typeof Entypo>['name'];
   color: string;
 }) {
-  return <IconSymbol size={28} style={{ marginBottom: -3 }} {...props} />;
+  return <Entypo size={28} style={{ marginBottom: -3 }} {...props} />;
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
 
   return (
     <Tabs
@@ -37,23 +35,23 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <TabBarIcon name="house" color={color} />,
+          title: '',
+          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
           tabBarButton: (props) => <HapticTab {...props} />,
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <TabBarIcon name="magnifyingglass" color={color} />,
+          title: '',
+          tabBarIcon: ({ color }) => <TabBarIcon name="magnifying-glass" color={color} />,
           tabBarButton: (props) => <HapticTab {...props} />,
         }}
       />
       <Tabs.Screen
         name="favorites"
         options={{
-          title: 'Favorites',
+          title: '',
           tabBarIcon: ({ color }) => <TabBarIcon name="heart" color={color} />,
           tabBarButton: (props) => <HapticTab {...props} />,
         }}
@@ -61,8 +59,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ color }) => <TabBarIcon name="person" color={color} />,
+          title: '',
+          tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
           tabBarButton: (props) => <HapticTab {...props} />,
         }}
       />

@@ -6,7 +6,7 @@ import { Image, StyleSheet, View } from 'react-native';
 export default function NotFoundScreen() {
   return (
     <View style={{ flex: 1 }}>
-      <Stack.Screen options={{ title: 'Oops!' }} />
+     <Stack.Screen options={{ headerShown: false }} />
       <ThemedView style={styles.container}>
         <Image
           source={require('@/assets/images/404.avif')} // Add a 404 illustration or animation here
