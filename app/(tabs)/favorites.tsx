@@ -1,11 +1,10 @@
-
 import Entypo from '@expo/vector-icons/Entypo';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Avatar, Card, FAB, Searchbar } from 'react-native-paper';
+import { Card, Searchbar } from 'react-native-paper';
 
-const notes = [
+const favoriteNotes = [
   {
     id: '1',
     title: 'Wishlist Buku Yang Harus Dibaca Untuk...',
@@ -13,19 +12,29 @@ const notes = [
     label: 'Personal',
     date: 'November 7, 2024',
     image: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2',
+    isFavorite: true,
   },
   {
     id: '2',
-    title: 'Tadzkirotussami’ Wal Mutakallim F...',
+    title: 'Tadzkirotussami Wal Mutakallim F...',
     preview: 'Pertemuan pertama yang merupakan sesi muqaddimah dari kajian...',
     label: 'Kajian Rutin',
     date: 'November 6, 2024',
     image: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca',
+    isFavorite: true,
   },
-  // Add more notes as needed
+  {
+    id: '3',
+    title: 'Meeting Notes - Project Planning',
+    preview: 'Discussed the upcoming features and timeline for the new app...',
+    label: 'Work',
+    date: 'November 5, 2024',
+    image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0',
+    isFavorite: true,
+  },
 ];
 
-export default function HomeScreen() {
+export default function FavoritesScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = React.useState('');
 
@@ -33,31 +42,31 @@ export default function HomeScreen() {
     router.push(`/note/${noteId}`);
   };
 
-  const handleCreateNote = () => {
-    router.push('/create-note');
-  };
-
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Avatar.Image size={44} source={{ uri: 'https://randomuser.me/api/portraits/men/36.jpg' }} />
-        <Text style={styles.title}>My Notes</Text>
+        <View style={styles.headerLeft}>
+          <Text style={styles.title}>Favorites</Text>
+          <Text style={styles.subtitle}>{favoriteNotes.length} notes</Text>
+        </View>
         <TouchableOpacity>
-        <Entypo name="dots-three-horizontal" color="black" style={styles.menuDots} />
+          <Entypo name="dots-three-horizontal" color="black" style={styles.menuDots} />
         </TouchableOpacity>
       </View>
+      
       {/* Search Bar */}
       <Searchbar
-        placeholder="Search Note..."
+        placeholder="Search favorites..."
         value={searchQuery}
         onChangeText={setSearchQuery}
         style={styles.searchBar}
         inputStyle={{ fontSize: 16 }}
       />
-      {/* Notes List */}
+      
+      {/* Favorites List */}
       <FlatList
-        data={notes}
+        data={favoriteNotes}
         keyExtractor={item => item.id}
         contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item }) => (
@@ -66,7 +75,10 @@ export default function HomeScreen() {
               <View style={styles.cardContent}>
                 <Image source={{ uri: item.image }} style={styles.cardImage} />
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.noteTitle} numberOfLines={1}>{item.title}</Text>
+                  <View style={styles.titleRow}>
+                    <Text style={styles.noteTitle} numberOfLines={1}>{item.title}</Text>
+                    <Entypo name="heart" size={16} color="#FF6B6B" />
+                  </View>
                   <Text style={styles.notePreview} numberOfLines={2}>{item.preview}</Text>
                   <View style={styles.noteFooter}>
                     <Text style={styles.noteLabel}>{item.label}</Text>
@@ -78,13 +90,6 @@ export default function HomeScreen() {
           </Card>
         )}
         style={{ marginTop: 10 }}
-      />
-      {/* Floating Action Button */}
-      <FAB
-        icon="plus"
-        style={styles.fab}
-        color="#fff"
-        onPress={handleCreateNote}
       />
     </View>
   );
@@ -100,23 +105,28 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 18,
   },
-  title: {
+  headerLeft: {
     flex: 1,
+  },
+  title: {
     fontSize: 26,
     fontWeight: '700',
     color: '#22223B',
-    marginLeft: 16,
     fontFamily: 'System',
   },
-  
-
+  subtitle: {
+    fontSize: 14,
+    color: '#6C6C80',
+    marginTop: 2,
+  },
   menuDots: {
     fontSize: 22,
     textAlign: 'center',
     backgroundColor: '#fff',
-    borderRadius:50,
+    borderRadius: 50,
     width: 36,
     height: 36,
     padding: 6
@@ -154,11 +164,18 @@ const styles = StyleSheet.create({
     marginRight: 14,
     backgroundColor: '#EEE',
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 2,
+  },
   noteTitle: {
     fontSize: 17,
     fontWeight: '700',
     color: '#22223B',
-    marginBottom: 2,
+    flex: 1,
+    marginRight: 8,
   },
   notePreview: {
     fontSize: 14,
@@ -183,17 +200,5 @@ const styles = StyleSheet.create({
   noteDate: {
     fontSize: 12,
     color: '#B5B5B5',
-  },
-  fab: {
-    position: 'absolute',
-    right: 24,
-    bottom: 32,
-    backgroundColor: '#6C63FF',
-    borderRadius: 32,
-    elevation: 6,
-    shadowColor: '#6C63FF',
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
   },
 }); 
