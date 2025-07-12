@@ -1,12 +1,11 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { Link, Stack } from 'expo-router';
+import { Link } from 'expo-router';
 import { Image, StyleSheet, View } from 'react-native';
 
 export default function NotFoundScreen() {
   return (
     <View style={{ flex: 1 }}>
-     <Stack.Screen options={{ headerShown: false }} />
       <ThemedView style={styles.container}>
         <Image
           source={require('@/assets/images/404.avif')} // Add a 404 illustration or animation here

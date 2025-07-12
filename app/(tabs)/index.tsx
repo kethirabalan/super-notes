@@ -1,33 +1,18 @@
 
+import { useAuth } from '@/contexts/AuthContext';
+import { useNotes } from '@/contexts/NotesContext';
 import Entypo from '@expo/vector-icons/Entypo';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Avatar, Card, FAB, Searchbar } from 'react-native-paper';
-
-const notes = [
-  {
-    id: '1',
-    title: 'Wishlist Buku Yang Harus Dibaca Untuk...',
-    preview: 'Mencapai perkembangan diri adalah perjalanan...',
-    label: 'Personal',
-    date: 'November 7, 2024',
-    image: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2',
-  },
-  {
-    id: '2',
-    title: 'Tadzkirotussami’ Wal Mutakallim F...',
-    preview: 'Pertemuan pertama yang merupakan sesi muqaddimah dari kajian...',
-    label: 'Kajian Rutin',
-    date: 'November 6, 2024',
-    image: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca',
-  },
-  // Add more notes as needed
-];
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { userData } = useAuth();
+  const { notes, loading, error, searchNotes } = useNotes();
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [filteredNotes, setFilteredNotes] = React.useState(notes);
 
   const handleNotePress = (noteId: string) => {
     router.push(`/note/${noteId}`);
@@ -37,34 +22,74 @@ export default function HomeScreen() {
     router.push('/create-note');
   };
 
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query);
+    if (query.trim()) {
+      const results = await searchNotes(query);
+      setFilteredNotes(results);
+    } else {
+      setFilteredNotes(notes);
+    }
+  };
+
+  // Update filtered notes when notes change
+  React.useEffect(() => {
+    setFilteredNotes(notes);
+  }, [notes]);
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color="#6C63FF" />
+        <Text style={styles.loadingText}>Loading notes...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <Text style={styles.errorText}>Error: {error}</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Avatar.Image size={44} source={{ uri: 'https://randomuser.me/api/portraits/men/36.jpg' }} />
+        <Avatar.Image 
+          size={44} 
+          source={{ uri: userData?.avatar || 'https://randomuser.me/api/portraits/men/36.jpg' }} 
+        />
         <Text style={styles.title}>My Notes</Text>
         <TouchableOpacity>
         <Entypo name="dots-three-horizontal" color="black" style={styles.menuDots} />
         </TouchableOpacity>
       </View>
+      
       {/* Search Bar */}
       <Searchbar
         placeholder="Search Note..."
         value={searchQuery}
-        onChangeText={setSearchQuery}
+        onChangeText={handleSearch}
         style={styles.searchBar}
         inputStyle={{ fontSize: 16 }}
       />
+      
       {/* Notes List */}
       <FlatList
-        data={notes}
+        data={filteredNotes}
         keyExtractor={item => item.id}
         contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item }) => (
           <Card style={styles.noteCard}>
             <TouchableOpacity onPress={() => handleNotePress(item.id)}>
               <View style={styles.cardContent}>
-                <Image source={{ uri: item.image }} style={styles.cardImage} />
+                <Image 
+                  source={{ uri: item.image || 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2' }} 
+                  style={styles.cardImage} 
+                />
                 <View style={{ flex: 1 }}>
                   <Text style={styles.noteTitle} numberOfLines={1}>{item.title}</Text>
                   <Text style={styles.notePreview} numberOfLines={2}>{item.preview}</Text>
@@ -78,7 +103,15 @@ export default function HomeScreen() {
           </Card>
         )}
         style={{ marginTop: 10 }}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Entypo name="documents" size={64} color="#6C6C80" />
+            <Text style={styles.emptyTitle}>No notes yet</Text>
+            <Text style={styles.emptySubtitle}>Create your first note to get started</Text>
+          </View>
+        }
       />
+      
       {/* Floating Action Button */}
       <FAB
         icon="plus"
@@ -97,6 +130,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingTop: 44,
   },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#6C6C80',
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#FF6B6B',
+    textAlign: 'center',
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -110,8 +157,6 @@ const styles = StyleSheet.create({
     marginLeft: 16,
     fontFamily: 'System',
   },
-  
-
   menuDots: {
     fontSize: 22,
     textAlign: 'center',
@@ -195,5 +240,23 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#22223B',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: '#6C6C80',
+    textAlign: 'center',
   },
 }); 

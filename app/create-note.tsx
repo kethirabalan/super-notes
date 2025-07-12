@@ -1,7 +1,9 @@
+import { useNotes } from '@/contexts/NotesContext';
+import { NoteFormData } from '@/types';
 import Entypo from '@expo/vector-icons/Entypo';
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Appbar } from 'react-native-paper';
 
 const categories = [
@@ -15,23 +17,68 @@ const categories = [
 
 export default function CreateNoteScreen() {
   const router = useRouter();
+  const { createNote } = useNotes();
   const [title, setTitle] = React.useState('');
   const [content, setContent] = React.useState('');
   const [selectedCategory, setSelectedCategory] = React.useState('Personal');
   const [isFavorite, setIsFavorite] = React.useState(false);
+  const [saving, setSaving] = React.useState(false);
+
+  const handleSave = async () => {
+    if (!title.trim() || !content.trim()) {
+      Alert.alert('Error', 'Please fill in both title and content');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const noteData: NoteFormData = {
+        title: title.trim(),
+        content: content.trim(),
+        label: selectedCategory,
+        isFavorite,
+      };
+
+      await createNote(noteData);
+      router.back();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to create note. Please try again.');
+      console.error('Error creating note:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleBack = () => {
+    if (title.trim() || content.trim()) {
+      Alert.alert(
+        'Discard Changes?',
+        'You have unsaved changes. Are you sure you want to leave?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Discard', style: 'destructive', onPress: () => router.back() },
+        ]
+      );
+    } else {
+      router.back();
+    }
+  };
 
   return (
     <View style={styles.container}>
-     <Stack.Screen options={{ headerShown: false }} />
       {/* Header */}
       <Appbar.Header style={styles.header}>
-        <Appbar.BackAction onPress={() => router.back()} />
+        <Appbar.BackAction onPress={handleBack} />
         <Appbar.Content title="New Note" />
         <Appbar.Action 
           icon={isFavorite ? "heart" : "heart-outline"} 
           onPress={() => setIsFavorite(!isFavorite)} 
         />
-        <Appbar.Action icon="check" onPress={() => router.back()} />
+        <Appbar.Action 
+          icon="check" 
+          onPress={handleSave}
+          disabled={saving || !title.trim() || !content.trim()}
+        />
       </Appbar.Header>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>

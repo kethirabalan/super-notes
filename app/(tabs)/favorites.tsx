@@ -1,46 +1,53 @@
+import { useNotes } from '@/contexts/NotesContext';
 import Entypo from '@expo/vector-icons/Entypo';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Card, Searchbar } from 'react-native-paper';
-
-const favoriteNotes = [
-  {
-    id: '1',
-    title: 'Wishlist Buku Yang Harus Dibaca Untuk...',
-    preview: 'Mencapai perkembangan diri adalah perjalanan...',
-    label: 'Personal',
-    date: 'November 7, 2024',
-    image: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2',
-    isFavorite: true,
-  },
-  {
-    id: '2',
-    title: 'Tadzkirotussami Wal Mutakallim F...',
-    preview: 'Pertemuan pertama yang merupakan sesi muqaddimah dari kajian...',
-    label: 'Kajian Rutin',
-    date: 'November 6, 2024',
-    image: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca',
-    isFavorite: true,
-  },
-  {
-    id: '3',
-    title: 'Meeting Notes - Project Planning',
-    preview: 'Discussed the upcoming features and timeline for the new app...',
-    label: 'Work',
-    date: 'November 5, 2024',
-    image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0',
-    isFavorite: true,
-  },
-];
 
 export default function FavoritesScreen() {
   const router = useRouter();
+  const { favoriteNotes, loading, error, searchNotes } = useNotes();
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [filteredNotes, setFilteredNotes] = React.useState(favoriteNotes);
 
   const handleNotePress = (noteId: string) => {
     router.push(`/note/${noteId}`);
   };
+
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query);
+    if (query.trim()) {
+      const results = await searchNotes(query);
+      // Filter to only show favorites from search results
+      const favoriteResults = results.filter(note => note.isFavorite);
+      setFilteredNotes(favoriteResults);
+    } else {
+      setFilteredNotes(favoriteNotes);
+    }
+  };
+
+  // Update filtered notes when favorite notes change
+  React.useEffect(() => {
+    setFilteredNotes(favoriteNotes);
+  }, [favoriteNotes]);
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color="#6C63FF" />
+        <Text style={styles.loadingText}>Loading favorites...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <Text style={styles.errorText}>Error: {error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -59,21 +66,24 @@ export default function FavoritesScreen() {
       <Searchbar
         placeholder="Search favorites..."
         value={searchQuery}
-        onChangeText={setSearchQuery}
+        onChangeText={handleSearch}
         style={styles.searchBar}
         inputStyle={{ fontSize: 16 }}
       />
       
       {/* Favorites List */}
       <FlatList
-        data={favoriteNotes}
+        data={filteredNotes}
         keyExtractor={item => item.id}
         contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item }) => (
           <Card style={styles.noteCard}>
             <TouchableOpacity onPress={() => handleNotePress(item.id)}>
               <View style={styles.cardContent}>
-                <Image source={{ uri: item.image }} style={styles.cardImage} />
+                <Image 
+                  source={{ uri: item.image || 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2' }} 
+                  style={styles.cardImage} 
+                />
                 <View style={{ flex: 1 }}>
                   <View style={styles.titleRow}>
                     <Text style={styles.noteTitle} numberOfLines={1}>{item.title}</Text>
@@ -90,6 +100,13 @@ export default function FavoritesScreen() {
           </Card>
         )}
         style={{ marginTop: 10 }}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Entypo name="heart" size={64} color="#6C6C80" />
+            <Text style={styles.emptyTitle}>No favorite notes</Text>
+            <Text style={styles.emptySubtitle}>Add notes to favorites to see them here</Text>
+          </View>
+        }
       />
     </View>
   );
@@ -101,6 +118,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F9FB',
     paddingHorizontal: 18,
     paddingTop: 44,
+  },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#6C6C80',
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#FF6B6B',
+    textAlign: 'center',
   },
   header: {
     flexDirection: 'row',
@@ -200,5 +231,23 @@ const styles = StyleSheet.create({
   noteDate: {
     fontSize: 12,
     color: '#B5B5B5',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#22223B',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: '#6C6C80',
+    textAlign: 'center',
   },
 }); 
