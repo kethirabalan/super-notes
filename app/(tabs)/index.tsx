@@ -1,75 +1,191 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import Entypo from '@expo/vector-icons/Entypo';
+import React from 'react';
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Avatar, Card, FAB, Searchbar } from 'react-native-paper';
+
+const notes = [
+  {
+    id: '1',
+    title: 'Wishlist Buku Yang Harus Dibaca Untuk...',
+    preview: 'Mencapai perkembangan diri adalah perjalanan...',
+    label: 'Personal',
+    date: 'November 7, 2024',
+    image: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2',
+  },
+  {
+    id: '2',
+    title: 'Tadzkirotussami’ Wal Mutakallim F...',
+    preview: 'Pertemuan pertama yang merupakan sesi muqaddimah dari kajian...',
+    label: 'Kajian Rutin',
+    date: 'November 6, 2024',
+    image: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca',
+  },
+  // Add more notes as needed
+];
 
 export default function HomeScreen() {
+  //   
+
+  const [searchQuery, setSearchQuery] = React.useState('');
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Avatar.Image size={44} source={{ uri: 'https://randomuser.me/api/portraits/men/36.jpg' }} />
+        <Text style={styles.title}>My Notes</Text>
+        <TouchableOpacity>
+        <Entypo name="dots-three-horizontal" color="black" style={styles.menuDots} />
+        </TouchableOpacity>
+      </View>
+      {/* Search Bar */}
+      <Searchbar
+        placeholder="Search Note..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        style={styles.searchBar}
+        inputStyle={{ fontSize: 16 }}
+      />
+      {/* Notes List */}
+      <FlatList
+        data={notes}
+        keyExtractor={item => item.id}
+        contentContainerStyle={{ paddingBottom: 100 }}
+        renderItem={({ item }) => (
+          <Card style={styles.noteCard}>
+            <TouchableOpacity>
+              <View style={styles.cardContent}>
+                <Image source={{ uri: item.image }} style={styles.cardImage} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.noteTitle} numberOfLines={1}>{item.title}</Text>
+                  <Text style={styles.notePreview} numberOfLines={2}>{item.preview}</Text>
+                  <View style={styles.noteFooter}>
+                    <Text style={styles.noteLabel}>{item.label}</Text>
+                    <Text style={styles.noteDate}>{item.date}</Text>
+                  </View>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </Card>
+        )}
+        style={{ marginTop: 10 }}
+      />
+      {/* Floating Action Button */}
+      <FAB
+        icon="plus"
+        style={styles.fab}
+        color="#fff"
+        onPress={() => { }}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#F8F9FB',
+    paddingHorizontal: 18,
+    paddingTop: 48,
+  },
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    marginBottom: 18,
   },
-  stepContainer: {
-    gap: 8,
+  title: {
+    flex: 1,
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#22223B',
+    marginLeft: 16,
+    fontFamily: 'System',
+  },
+  
+
+  menuDots: {
+    fontSize: 22,
+    textAlign: 'center',
+    backgroundColor: '#fff',
+    borderRadius:50,
+    width: 36,
+    height: 36,
+    padding: 6
+  },
+  searchBar: {
+    borderRadius: 16,
+    marginBottom: 10,
+    backgroundColor: '#fff',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  noteCard: {
+    borderRadius: 18,
+    marginBottom: 16,
+    backgroundColor: '#fff',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.07,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    padding: 0,
+  },
+  cardContent: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    padding: 16,
+  },
+  cardImage: {
+    width: 54,
+    height: 54,
+    borderRadius: 12,
+    marginRight: 14,
+    backgroundColor: '#EEE',
+  },
+  noteTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#22223B',
+    marginBottom: 2,
+  },
+  notePreview: {
+    fontSize: 14,
+    color: '#6C6C80',
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  noteFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 2,
   },
-});
+  noteLabel: {
+    fontSize: 12,
+    color: '#6C63FF',
+    backgroundColor: '#F3F0FF',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    marginRight: 8,
+    fontWeight: '600',
+  },
+  noteDate: {
+    fontSize: 12,
+    color: '#B5B5B5',
+  },
+  fab: {
+    position: 'absolute',
+    right: 24,
+    bottom: 32,
+    backgroundColor: '#6C63FF',
+    borderRadius: 32,
+    elevation: 6,
+    shadowColor: '#6C63FF',
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+  },
+}); 

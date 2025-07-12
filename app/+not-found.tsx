@@ -1,20 +1,31 @@
-import { Link, Stack } from 'expo-router';
-import { StyleSheet } from 'react-native';
-
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { Link, Stack } from 'expo-router';
+import { Image, StyleSheet, View } from 'react-native';
 
 export default function NotFoundScreen() {
   return (
-    <>
+    <View style={{ flex: 1 }}>
       <Stack.Screen options={{ title: 'Oops!' }} />
       <ThemedView style={styles.container}>
-        <ThemedText type="title">This screen does not exist.</ThemedText>
+        <Image
+          source={require('@/assets/images/404.avif')} // Add a 404 illustration or animation here
+          style={styles.image}
+          resizeMode="contain"
+        />
+        <ThemedText type="title" style={styles.title}>
+          Page Not Found
+        </ThemedText>
+        <ThemedText type="default" style={styles.subtitle}>
+          The page you’re looking for doesn’t exist or has been moved.
+        </ThemedText>
         <Link href="/" style={styles.link}>
-          <ThemedText type="link">Go to home screen!</ThemedText>
+          <ThemedText type="link" style={{ color: '#fff' }}>
+            Go back to Home
+          </ThemedText>
         </Link>
       </ThemedView>
-    </>
+    </View>
   );
 }
 
@@ -23,10 +34,31 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
+    padding: 24,
+    backgroundColor: '#fff',
+  },
+  image: {
+    width: 300,
+    height: 300,
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 22,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 24,
+    paddingHorizontal: 10,
   },
   link: {
-    marginTop: 15,
-    paddingVertical: 15,
+    marginTop: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: '#093FB4',
+    borderRadius: 8,
   },
 });
