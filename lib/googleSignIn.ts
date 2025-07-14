@@ -2,17 +2,13 @@ import { environment } from '../environments/environment';
 
 export const googleSignInConfig = {
   // Use environment-specific client ID
-  clientId: environment.production 
-    ? '1017757914937-sbmbjt255qp5k3qoa5i7u22fm015qqbl.apps.googleusercontent.com'
-    : '1017757914937-sbmbjt255qp5k3qoa5i7u22fm015qqbl.apps.googleusercontent.com',
+  clientId: environment.googleOAuth.clientId,
   
   // Scopes for Google Sign-In
   scopes: ['openid', 'profile', 'email'],
   
   // Redirect URI for Expo Auth Session
-  redirectUri: environment.production
-    ? 'https://auth.expo.io/@balantvl-org/supernotes'
-    : 'https://auth.expo.io/@balantvl-org/supernotes',
+  redirectUri: environment.googleOAuth.redirectUri,
   
   // Additional configuration for production
   ...(environment.production && {

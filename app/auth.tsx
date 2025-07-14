@@ -1,11 +1,9 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { googleSignInConfig } from '@/lib/googleSignIn';
-import MaskedView from '@react-native-masked-view/masked-view';
 import * as GoogleSignIn from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import React from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { LinearGradient } from 'react-native-linear-gradient';
 import { Button, Card, Divider } from 'react-native-paper';
 
 // Ensure WebBrowser redirects work properly
@@ -97,21 +95,13 @@ export default function AuthScreen() {
   return (
     <View style={styles.container}>
     <View style={styles.header}>
-      <MaskedView
-        maskElement={
-          <Text style={[styles.title, { backgroundColor: 'transparent' }]}>
+      <View style={styles.titleContainer}>
+        <View>
+          <Text style={[styles.title, { color: 'green', marginBottom: 10 }]}>
             Super Notes
           </Text>
-        }
-      >
-        <LinearGradient
-          colors={['#6C63FF', '#FF6C63', '#63FF6C']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-        >
-          <Text style={[styles.title, { opacity: 0 }]}>Super Notes</Text>
-        </LinearGradient>
-      </MaskedView>
+        </View>
+      </View>
 
       <Text style={styles.subtitle}>Your personal note-taking app</Text>
     </View>
@@ -214,11 +204,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 40,
   },
+  titleContainer: {
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   title: {
     fontSize: 32,
     fontWeight: '700',
-    color: 'black',
-    marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
