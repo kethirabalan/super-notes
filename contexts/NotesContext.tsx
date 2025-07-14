@@ -89,6 +89,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     
     try {
       await notesService.updateNote(noteId, noteData);
+      console.log('Updated note:', noteData);
       await fetchNotes(); // Refresh notes list
       await fetchFavoriteNotes(); // Refresh favorites if needed
     } catch (err) {
@@ -155,6 +156,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Fetch notes when user changes
   useEffect(() => {
+    
     if (user) {
       fetchNotes();
       fetchFavoriteNotes();

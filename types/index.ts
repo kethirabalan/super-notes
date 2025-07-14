@@ -5,7 +5,7 @@ export interface Note {
   preview?: string;
   category: string;
   tags: string[];
-  image?: string;
+  image?: string | null;
   isFavorite: boolean;
   userId: string;
   createdAt: Date;
@@ -18,6 +18,7 @@ export interface User {
   email: string;
   avatar?: string;
   createdAt: Date;
+  image?: string;
 }
 
 export interface Category {

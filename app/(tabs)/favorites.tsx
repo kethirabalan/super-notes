@@ -57,9 +57,9 @@ export default function FavoritesScreen() {
           <Text style={styles.title}>Favorites</Text>
           <Text style={styles.subtitle}>{favoriteNotes.length} notes</Text>
         </View>
-        <TouchableOpacity>
+        {/* <TouchableOpacity>
           <Entypo name="dots-three-horizontal" color="black" style={styles.menuDots} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       
       {/* Search Bar */}

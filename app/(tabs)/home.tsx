@@ -60,12 +60,12 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <Avatar.Image 
           size={44} 
-          source={{ uri: userData?.avatar || 'https://randomuser.me/api/portraits/men/36.jpg' }} 
+          source={{ uri: userData?.avatar || userData?.image || 'https://randomuser.me/api/portraits/men/36.jpg' }} 
         />
         <Text style={styles.title}>My Notes</Text>
-        <TouchableOpacity>
+        {/* <TouchableOpacity>
         <Entypo name="dots-three-horizontal" color="black" style={styles.menuDots} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       
       {/* Search Bar */}

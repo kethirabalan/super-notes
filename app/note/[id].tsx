@@ -1,46 +1,105 @@
+import { useNotes } from '@/contexts/NotesContext';
+import { Note } from '@/types';
 import Entypo from '@expo/vector-icons/Entypo';
+import * as Clipboard from 'expo-clipboard';
+import * as FileSystem from 'expo-file-system';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import React from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import * as Sharing from 'expo-sharing';
+import React, { useEffect, useState } from 'react';
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Appbar, Chip } from 'react-native-paper';
-
-const noteData = {
-  id: '1',
-  title: 'Wishlist Buku Yang Harus Dibaca Untuk Perkembangan Diri',
-  content: `Mencapai perkembangan diri adalah perjalanan yang membutuhkan dedikasi dan konsistensi. Salah satu cara terbaik untuk mengembangkan diri adalah melalui membaca buku-buku yang berkualitas.
-
-Buku-buku yang direkomendasikan:
-
-1. "Atomic Habits" oleh James Clear
-   - Fokus pada pembentukan kebiasaan kecil yang berdampak besar
-   - Teknik-teknik praktis untuk mengubah perilaku
-
-2. "Deep Work" oleh Cal Newport
-   - Strategi untuk fokus dan produktivitas
-   - Mengelola distraksi di era digital
-
-3. "Mindset" oleh Carol Dweck
-   - Perbedaan antara fixed mindset dan growth mindset
-   - Cara mengembangkan pola pikir yang berkembang
-
-4. "The Power of Habit" oleh Charles Duhigg
-   - Sains di balik pembentukan kebiasaan
-   - Cara mengubah kebiasaan buruk menjadi baik
-
-5. "Essentialism" oleh Greg McKeown
-   - Seni melakukan hal yang benar
-   - Fokus pada yang benar-benar penting
-
-Setiap buku ini memberikan perspektif unik tentang pengembangan diri dan dapat membantu kita menjadi versi yang lebih baik dari diri kita sendiri.`,
-  label: 'Personal',
-  date: 'November 7, 2024',
-  image: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2',
-  isFavorite: true,
-};
 
 export default function NoteDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  const { notes, loading, toggleFavorite, updateNote, fetchNotes } = useNotes();
+  const [note, setNote] = useState<Note | undefined>(() => notes.find((n) => n.id === id));
+  const [fetching, setFetching] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fallback: fetch notes if not found (for direct link)
+  useEffect(() => {
+    if (!note && !loading && id) {
+      setFetching(true);
+      fetchNotes()
+        .then(() => {
+          const found = notes.find((n) => n.id === id);
+          setNote(found);
+        })
+        .catch((e) => setError('Failed to load note.'))
+        .finally(() => setFetching(false));
+    } else if (notes.length && id) {
+      setNote(notes.find((n) => n.id === id));
+    }
+  }, [id, notes, loading]);
+
+  // Like/favorite handler
+  const handleToggleFavorite = async () => {
+    if (!note) return;
+    try {
+      await toggleFavorite(note.id, !note.isFavorite);
+      setNote({ ...note, isFavorite: !note.isFavorite });
+    } catch (e) {
+      Alert.alert('Error', 'Failed to update favorite status.');
+    }
+  };
+
+  // Share handler
+  const handleShare = async () => {
+    if (!note) return;
+    try {
+      const content = `${note.title}\n\n${note.content}`;
+      if (await Sharing.isAvailableAsync()) {
+        // On native, create a temporary file to share
+        const fileUri = `${FileSystem.cacheDirectory}note.txt`;
+        await FileSystem.writeAsStringAsync(fileUri, content);
+        await Sharing.shareAsync(fileUri, {
+          dialogTitle: note.title,
+          mimeType: 'text/plain',
+          UTI: 'public.text',
+        });
+      } else {
+        await Clipboard.setStringAsync(content);
+        Alert.alert('Copied', 'Note content copied to clipboard.');
+      }
+    } catch (e) {
+      Alert.alert('Error', 'Failed to share note.');
+    }
+  };
+
+  // Edit handler
+  const handleEdit = () => {
+    if (!note) return;
+    router.push({ pathname: '/create-note', params: { editId: note.id } });
+  };
+
+  if (loading || fetching) {
+    return (
+      <View style={styles.container}>
+        <Appbar.Header style={styles.header}>
+          <Appbar.BackAction onPress={() => router.back()} />
+          <Appbar.Content title="" />
+        </Appbar.Header>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={{ color: '#6C63FF', fontSize: 18 }}>Loading note...</Text>
+        </View>
+      </View>
+    );
+  }
+  if (error || !note) {
+    return (
+      <View style={styles.container}>
+        <Appbar.Header style={styles.header}>
+          <Appbar.BackAction onPress={() => router.back()} />
+          <Appbar.Content title="" />
+        </Appbar.Header>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={{ color: '#FF6B6B', fontSize: 18 }}>{error || 'Note not found.'}</Text>
+        </View>
+      </View>
+    );
+  }
+  console.log(note.image);
 
   return (
     <View style={styles.container}>
@@ -49,18 +108,17 @@ export default function NoteDetailScreen() {
       <Appbar.Header style={styles.header}>
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title="" />
-        <Appbar.Action icon="heart" onPress={() => {}} />
-        <Appbar.Action icon="share" onPress={() => {}} />
+        <Appbar.Action icon={note.isFavorite ? 'heart' : 'heart-outline'} onPress={handleToggleFavorite} />
+        <Appbar.Action icon="share" onPress={handleShare} />
         <Appbar.Action icon="dots-vertical" onPress={() => {}} />
       </Appbar.Header>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Note Image */}
-        <Image source={{ uri: noteData.image }} style={styles.noteImage} />
+        {note.image && <Image source={{ uri: note.image }} style={styles.noteImage} />}
 
         {/* Note Content */}
         <View style={styles.noteContent}>
-          <Text style={styles.noteTitle}>{noteData.title}</Text>
+          <Text style={styles.noteTitle}>{note.title}</Text>
           
           <View style={styles.noteMeta}>
             <Chip 
@@ -68,17 +126,17 @@ export default function NoteDetailScreen() {
               textStyle={{ color: '#6C63FF' }}
               style={styles.categoryChip}
             >
-              {noteData.label}
+              {note.category}
             </Chip>
-            <Text style={styles.noteDate}>{noteData.date}</Text>
+            <Text style={styles.noteDate}>{note.createdAt?.toLocaleDateString?.() || ''}</Text>
           </View>
 
-          <Text style={styles.noteText}>{noteData.content}</Text>
+          <Text style={styles.noteText}>{note.content}</Text>
         </View>
       </ScrollView>
 
       {/* Floating Action Button for Edit */}
-      <TouchableOpacity style={styles.editFab}>
+      <TouchableOpacity style={styles.editFab} onPress={handleEdit}>
         <Entypo name="edit" size={24} color="#fff" />
       </TouchableOpacity>
     </View>

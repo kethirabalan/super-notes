@@ -161,9 +161,9 @@ export default function ExploreScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Explore</Text>
-        <TouchableOpacity>
+        {/* <TouchableOpacity>
           <Entypo name="dots-three-horizontal" color="black" style={styles.menuDots} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* Search Bar */}

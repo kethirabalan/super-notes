@@ -47,8 +47,8 @@ export default function AuthScreen() {
       }
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Authentication failed');
-    } finally {
-      navigation.navigate('' as never);
+    } finally { 
+      navigation.navigate('home' as never);
       setLoading(false);
     }
   };
@@ -78,6 +78,7 @@ export default function AuthScreen() {
       console.error('Google Sign-In error:', error);
       Alert.alert('Error', 'Google Sign-In failed. Please try again.');
     } finally {
+      navigation.navigate('home' as never);
       setGoogleLoading(false);
     }
   };

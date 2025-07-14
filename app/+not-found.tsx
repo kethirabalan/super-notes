@@ -18,7 +18,7 @@ export default function NotFoundScreen() {
         <ThemedText type="default" style={styles.subtitle}>
           The page you’re looking for doesn’t exist or has been moved.
         </ThemedText>
-        <Link href="/" style={styles.link}>
+        <Link href="/(tabs)/home" style={styles.link}>
           <ThemedText type="link" style={{ color: '#fff' }}>
             Go back to Home
           </ThemedText>

@@ -2,7 +2,7 @@ import { useNotes } from '@/contexts/NotesContext';
 import { environment } from '@/environments/environment';
 import Entypo from '@expo/vector-icons/Entypo';
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Appbar } from 'react-native-paper';
@@ -22,15 +22,33 @@ const CLOUDINARY_CLOUD_NAME = environment.cloudinary.cloudName; // TODO: Replace
 
 export default function CreateNoteScreen() {
   const router = useRouter();
-  const { createNote } = useNotes();
-  const [title, setTitle] = React.useState('');
-  const [content, setContent] = React.useState('');
-  const [selectedCategory, setSelectedCategory] = React.useState('Personal');
-  const [isFavorite, setIsFavorite] = React.useState(false);
+  const { notes, createNote, updateNote } = useNotes();
+  const { editId } = useLocalSearchParams();
+  const isEditing = !!editId;
+
+  // Find the note if editing
+  const editingNote = isEditing ? notes.find((n) => n.id === editId) : undefined;
+
+  // State, initialized with editing note if present
+  const [title, setTitle] = React.useState(editingNote?.title || '');
+  const [content, setContent] = React.useState(editingNote?.content || '');
+  const [selectedCategory, setSelectedCategory] = React.useState(editingNote?.category || 'Personal');
+  const [isFavorite, setIsFavorite] = React.useState(editingNote?.isFavorite || false);
   const [saving, setSaving] = React.useState(false);
-  const [image, setImage] = React.useState<string | null>(null);
+  const [image, setImage] = React.useState<string | null>(editingNote?.image || null);
   const [imageFile, setImageFile] = React.useState<File | undefined>(undefined);
   const [uploading, setUploading] = React.useState(false);
+
+  // If editing, update state when editingNote changes (e.g. after fetch)
+  React.useEffect(() => {
+    if (editingNote) {
+      setTitle(editingNote.title);
+      setContent(editingNote.content);
+      setSelectedCategory(editingNote.category);
+      setIsFavorite(editingNote.isFavorite);
+      setImage(editingNote.image || null);
+    }
+  }, [editingNote]);
 
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -92,23 +110,34 @@ export default function CreateNoteScreen() {
     }
     setSaving(true);
     try {
-      let imageUrl = '';
-      if (image) {
+      let imageUrl = image || '';
+      if (image && imageFile) {
         imageUrl = await uploadImageToCloudinary(image, imageFile);
       }
-      const noteData = {
+      const noteData: any = {
         title: title.trim(),
         content: content.trim(),
         category: selectedCategory,
         tags: [],
         isFavorite,
-        image: imageUrl || undefined,
       };
-      await createNote(noteData);
+      // Always include the image if editing and it exists, or if a new image is picked
+      if (imageUrl) {
+        noteData.image = imageUrl;
+      } else if (isEditing && editingNote?.image) {
+        noteData.image = editingNote.image;
+      }
+      if (isEditing && editId) {
+        console.log('Updating note:', noteData);
+        await updateNote(editId as string, noteData);
+      } else {
+        console.log('Creating note:', noteData);
+        await createNote(noteData);
+      }
       router.back();
     } catch (error) {
-      Alert.alert('Error', 'Failed to create note. Please try again.');
-      console.error('Error creating note:', error);
+      Alert.alert('Error', isEditing ? 'Failed to update note. Please try again.' : 'Failed to create note. Please try again.');
+      console.error('Error saving note:', error);
     } finally {
       setSaving(false);
     }
@@ -122,6 +151,7 @@ export default function CreateNoteScreen() {
         [
           { text: 'Cancel', style: 'cancel' },
           { text: 'Discard', style: 'destructive', onPress: () => router.back() },
+          // { text: 'Discard', style: 'destructive', onPress: () => router.navigate('/(tabs)/home' as never) },
         ]
       );
     } else {
@@ -134,7 +164,7 @@ export default function CreateNoteScreen() {
       {/* Header */}
       <Appbar.Header style={styles.header}>
         <Appbar.BackAction onPress={handleBack} />
-        <Appbar.Content title="New Note" />
+        <Appbar.Content title={isEditing ? 'Edit Note' : 'New Note'} />
         <Appbar.Action 
           icon={isFavorite ? "heart" : "heart-outline"} 
           onPress={() => setIsFavorite(!isFavorite)} 
@@ -161,6 +191,29 @@ export default function CreateNoteScreen() {
             </View>
           )}
         </TouchableOpacity>
+        {/* Image URL Input */}
+        <TextInput
+          style={{
+            backgroundColor: '#fff',
+            borderRadius: 12,
+            padding: 12,
+            marginBottom: 16,
+            fontSize: 16,
+            borderWidth: 1,
+            borderColor: '#E0E0E0',
+          }}
+          placeholder="Paste image URL (optional)"
+          value={image || ''}
+          onChangeText={setImage}
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
+        {/* Show preview if image URL is entered and not picked */}
+        {image && (
+          <View style={{ alignItems: 'center', marginBottom: 16 }}>
+            <Image source={{ uri: image }} style={{ width: '100%', height: 120, borderRadius: 16 }} resizeMode="cover" />
+          </View>
+        )}
 
         {/* Title Input */}
         <View style={styles.inputContainer}>

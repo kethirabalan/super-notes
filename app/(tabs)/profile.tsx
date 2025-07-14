@@ -1,9 +1,10 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotes } from '@/contexts/NotesContext';
 import Entypo from '@expo/vector-icons/Entypo';
-import React from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Avatar, Card, Divider, List } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
+import React, { useState } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Avatar, Card, Divider, List, Button as PaperButton } from 'react-native-paper';
 
 const settingsOptions = [
   { title: 'Account Settings', icon: 'user' as const, subtitle: 'Manage your account' },
@@ -15,13 +16,86 @@ const settingsOptions = [
   { title: 'About', icon: 'info' as const, subtitle: 'App version 1.0.0' },
 ];
 
+function EditProfileScreen({ navigation }: { navigation: { goBack: () => void } }) {
+  const { userData, updateUserData } = useAuth();
+  const [name, setName] = useState(userData?.name || '');
+  const [avatar, setAvatar] = useState(userData?.avatar || '');
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await updateUserData({ name, avatar });
+      navigation.goBack();
+    } catch (e) {
+      alert('Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <View style={{ flex: 1, backgroundColor: '#F8F9FB', justifyContent: 'center', padding: 24 }}>
+      <Card style={{ borderRadius: 20, padding: 24, backgroundColor: '#fff', elevation: 4 }}>
+        <View style={{ alignItems: 'center', marginBottom: 24 }}>
+          <Avatar.Image size={80} source={{ uri: avatar || 'https://randomuser.me/api/portraits/men/36.jpg' }} />
+        </View>
+        <Divider style={{ marginBottom: 24 }} />
+        <Text style={{ fontSize: 16, fontWeight: '600', marginBottom: 8, color: '#22223B' }}>Name</Text>
+        <TextInput
+          value={name}
+          onChangeText={setName}
+          placeholder="Your name"
+          style={{
+            backgroundColor: '#F8F9FB',
+            borderRadius: 12,
+            padding: 16,
+            marginBottom: 20,
+            fontSize: 16,
+            borderWidth: 1,
+            borderColor: '#E0E0E0',
+          }}
+        />
+        <Text style={{ fontSize: 16, fontWeight: '600', marginBottom: 8, color: '#22223B' }}>Avatar URL</Text>
+        <TextInput
+          value={avatar}
+          onChangeText={setAvatar}
+          placeholder="Paste image URL"
+          style={{
+            backgroundColor: '#F8F9FB',
+            borderRadius: 12,
+            padding: 16,
+            marginBottom: 28,
+            fontSize: 16,
+            borderWidth: 1,
+            borderColor: '#E0E0E0',
+          }}
+        />
+        <PaperButton
+          mode="contained"
+          onPress={handleSave}
+          loading={saving}
+          disabled={saving}
+          style={{ borderRadius: 12, backgroundColor: '#6C63FF', marginTop: 8 }}
+          contentStyle={{ paddingVertical: 8 }}
+          labelStyle={{ fontSize: 16, fontWeight: '600', color: '#fff' }}
+        >
+          Save Changes
+        </PaperButton>
+      </Card>
+    </View>
+  );
+}
+
 export default function ProfileScreen() {
   const { user, userData, signOut } = useAuth();
   const { notes, favoriteNotes, loading } = useNotes();
-
+  const navigation = useNavigation();
+  const [editing, setEditing] = useState(false);
   const handleLogout = async () => {
     try {
       await signOut();
+      navigation.navigate('auth' as never);
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -62,14 +136,18 @@ export default function ProfileScreen() {
     );
   }
 
+  if (editing) {
+    return <EditProfileScreen navigation={{ goBack: () => setEditing(false) }} />;
+  }
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Profile</Text>
-        <TouchableOpacity>
+        {/* <TouchableOpacity>
           <Entypo name="dots-three-horizontal" color="black" style={styles.menuDots} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* User Info Card */}
@@ -82,7 +160,7 @@ export default function ProfileScreen() {
           <View style={styles.userDetails}>
             <Text style={styles.userName}>{userData?.name || user?.displayName || 'User'}</Text>
             <Text style={styles.userEmail}>{userData?.email || user?.email || 'user@example.com'}</Text>
-            <TouchableOpacity style={styles.editButton}>
+            <TouchableOpacity style={styles.editButton} onPress={() => setEditing(true)}>
               <Text style={styles.editButtonText}>Edit Profile</Text>
             </TouchableOpacity>
           </View>
