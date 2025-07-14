@@ -1,11 +1,4 @@
 {
-  "indexes": [
-    {
-      "collectionId": "notes",
-      "fields": [
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    }
-  ],
+  "indexes": [],
   "fieldOverrides": []
 }

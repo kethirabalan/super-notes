@@ -1,5 +1,6 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { googleSignInConfig } from '@/lib/googleSignIn';
+import { useNavigation } from '@react-navigation/native';
 import * as GoogleSignIn from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import React from 'react';
@@ -10,6 +11,7 @@ import { Button, Card, Divider } from 'react-native-paper';
 WebBrowser.maybeCompleteAuthSession();
 
 export default function AuthScreen() {
+  const navigation = useNavigation();
   const { signIn, signUp, signInWithGoogle } = useAuth();
   const [isLogin, setIsLogin] = React.useState(true);
   const [email, setEmail] = React.useState('');
@@ -46,6 +48,7 @@ export default function AuthScreen() {
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Authentication failed');
     } finally {
+      navigation.navigate('' as never);
       setLoading(false);
     }
   };
