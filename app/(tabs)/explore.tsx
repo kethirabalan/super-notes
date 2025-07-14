@@ -1,6 +1,6 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotes } from '@/contexts/NotesContext';
-import Entypo from '@expo/vector-icons/Entypo';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -20,16 +20,16 @@ const categoryColors = {
 };
 
 const categoryIcons = {
-  'Personal': 'user',
-  'Work': 'briefcase',
+  'Personal': 'person',
+  'Work': 'work',
   'Study': 'book',
-  'Ideas': 'light-bulb',
-  'Travel': 'location',
-  'Health': 'heart',
+  'Ideas': 'lightbulb-outline',
+  'Travel': 'flight-takeoff',
+  'Health': 'heart-health',
   'Kajian Rutin': 'book',
-  'Meeting': 'users',
+  'Meeting': 'groups',
   'Project': 'folder',
-  'Default': 'documents',
+  'Default': 'description',
 };
 
 export default function ExploreScreen() {
@@ -52,7 +52,7 @@ export default function ExploreScreen() {
     return Object.entries(categoryCounts).map(([name, count]) => ({
       id: name,
       name,
-      icon: categoryIcons[name as keyof typeof categoryIcons] || 'documents',
+      icon: categoryIcons[name as keyof typeof categoryIcons] || 'description',
       color: categoryColors[name as keyof typeof categoryColors] || '#6C6C80',
       count,
     }));
@@ -111,7 +111,7 @@ export default function ExploreScreen() {
       onPress={() => handleCategoryPress(item.name)}
     >
       <View style={[styles.categoryIcon, { backgroundColor: item.color + '20' }]}>
-        <Entypo name={item.icon as any} size={24} color={item.color} />
+        <MaterialIcons name={item.icon as any} size={24} color={item.color} />
       </View>
       <Text style={styles.categoryName}>{item.name}</Text>
       <Text style={styles.categoryCount}>{item.count} notes</Text>
@@ -191,7 +191,7 @@ export default function ExploreScreen() {
           />
         ) : (
           <View style={styles.emptyContainer}>
-            <Entypo name="folder" size={48} color="#6C6C80" />
+            <MaterialIcons name="folder" size={48} color="#6C6C80" />
             <Text style={styles.emptyText}>No categories yet</Text>
             <Text style={styles.emptySubtext}>Create notes to see categories</Text>
           </View>
@@ -217,7 +217,7 @@ export default function ExploreScreen() {
             contentContainerStyle={{ paddingBottom: 100 }}
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
-                <Entypo name="documents" size={64} color="#6C6C80" />
+                <MaterialIcons name="description" size={64} color="#6C6C80" />
                 <Text style={styles.emptyTitle}>
                   {selectedCategory ? `No ${selectedCategory} notes` : 'No notes yet'}
                 </Text>

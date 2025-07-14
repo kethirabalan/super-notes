@@ -1,4 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { router } from 'expo-router';
 import React from 'react';
@@ -39,7 +40,7 @@ export default function AccountSettings() {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={() => router.navigate('profile' as never)}>
-        <Text style={styles.backText}>← Back</Text>
+      <MaterialIcons name="arrow-back" size={24} color="#007AFF" />
       </TouchableOpacity>
       <Text style={styles.title}>Account Settings</Text>
       <Text>Manage your account here.</Text>

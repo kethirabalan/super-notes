@@ -1,6 +1,6 @@
 import { useNotes } from '@/contexts/NotesContext';
 import { environment } from '@/environments/environment';
-import Entypo from '@expo/vector-icons/Entypo';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
@@ -181,12 +181,12 @@ export default function CreateNoteScreen() {
         <TouchableOpacity style={styles.imagePicker} onPress={pickImage} disabled={uploading || saving}>
           {image ? (
             <View style={styles.imagePlaceholder}>
-              <Entypo name="camera" size={32} color="#6C6C80" style={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }} />
+              <MaterialIcons name="camera" size={32} color="#6C6C80" style={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }} />
               <Image source={{ uri: image }} style={{ width: '100%', height: '100%', borderRadius: 16 }} resizeMode="cover" />
             </View>
           ) : (
             <View style={styles.imagePlaceholder}>
-              <Entypo name="camera" size={32} color="#6C6C80" />
+              <MaterialIcons name="camera" size={32} color="#6C6C80" />
               <Text style={styles.imagePlaceholderText}>Add Cover Image</Text>
             </View>
           )}
@@ -272,19 +272,19 @@ export default function CreateNoteScreen() {
           <Text style={styles.sectionTitle}>Formatting</Text>
           <View style={styles.formattingTools}>
             <TouchableOpacity style={styles.formatButton}>
-              <Entypo name="text" size={20} color="#6C6C80" />
+              <MaterialIcons name="title" size={20} color="#6C6C80" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.formatButton}>
-              <Entypo name="text" size={20} color="#6C6C80" />
+              <MaterialIcons name="title" size={20} color="#6C6C80" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.formatButton}>
-              <Entypo name="list" size={20} color="#6C6C80" />
+              <MaterialIcons name="format-list-numbered" size={20} color="#6C6C80" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.formatButton}>
-              <Entypo name="link" size={20} color="#6C6C80" />
+              <MaterialIcons name="link" size={20} color="#6C6C80" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.formatButton}>
-              <Entypo name="image" size={20} color="#6C6C80" />
+              <MaterialIcons name="image" size={20} color="#6C6C80" />
             </TouchableOpacity>
           </View>
         </View>

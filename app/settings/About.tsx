@@ -1,3 +1,4 @@
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { router } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -6,7 +7,7 @@ export default function About() {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={() => router.navigate('profile' as never)}>
-        <Text style={styles.backText}>← Back</Text>
+      <MaterialIcons name="arrow-back" size={24} color="#007AFF" /> 
       </TouchableOpacity>
       <Text style={styles.title}>About</Text>
       <Text>App version 1.0.0</Text>

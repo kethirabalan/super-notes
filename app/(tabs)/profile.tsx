@@ -1,6 +1,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotes } from '@/contexts/NotesContext';
 import Entypo from '@expo/vector-icons/Entypo';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -35,7 +36,10 @@ function EditProfileScreen({ navigation }: { navigation: { goBack: () => void } 
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#F8F9FB', justifyContent: 'center', padding: 24 }}>
+    <View style={{ flex: 1, backgroundColor: '#F8F9FB', padding: 24 }}>
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <MaterialIcons name="arrow-back" size={24} color="#007AFF" />
+      </TouchableOpacity>
       <Card style={{ borderRadius: 20, padding: 24, backgroundColor: '#fff', elevation: 4 }}>
         <View style={{ alignItems: 'center', marginBottom: 24 }}>
           <Avatar.Image size={80} source={{ uri: avatar || 'https://randomuser.me/api/portraits/men/36.jpg' }} />
@@ -245,6 +249,12 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     padding: 6
+  },
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    zIndex: 10,
   },
   userCard: {
     borderRadius: 18,

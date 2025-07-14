@@ -1,6 +1,6 @@
 import { useNotes } from '@/contexts/NotesContext';
 import { Note } from '@/types';
-import Entypo from '@expo/vector-icons/Entypo';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as Clipboard from 'expo-clipboard';
 import * as FileSystem from 'expo-file-system';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
@@ -137,7 +137,7 @@ export default function NoteDetailScreen() {
 
       {/* Floating Action Button for Edit */}
       <TouchableOpacity style={styles.editFab} onPress={handleEdit}>
-        <Entypo name="edit" size={24} color="#fff" />
+        <MaterialIcons name="edit" size={24} color="#fff" />
       </TouchableOpacity>
     </View>
   );

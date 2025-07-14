@@ -1,14 +1,14 @@
 import { HapticTab } from '@/components/HapticTab';
-import Entypo from '@expo/vector-icons/Entypo';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
 
 function TabBarIcon(props: {
-  name: React.ComponentProps<typeof Entypo>['name'];
+  name: React.ComponentProps<typeof MaterialIcons>['name'];
   color: string;
 }) {
-  return <Entypo size={28} style={{ marginBottom: -3 }} {...props} />;
+  return <MaterialIcons size={28} style={{ marginBottom: -3 }} {...props} />;
 }
 
 export default function TabLayout() {
@@ -21,7 +21,7 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: '#fff',
           borderTopWidth: 1,
-          borderTopColor: '#F0F0F0',
+          // borderTopColor: '#F0F0F0',
           paddingBottom: Platform.OS === 'ios' ? 20 : 10,
           paddingTop: 10,
           height: Platform.OS === 'ios' ? 90 : 70,
@@ -36,7 +36,7 @@ export default function TabLayout() {
         name="home"
         options={{
           title: '',
-          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />, // home icon
           tabBarButton: (props) => <HapticTab {...props} />,
         }}
       />
@@ -44,7 +44,7 @@ export default function TabLayout() {
         name="explore"
         options={{
           title: '',
-          tabBarIcon: ({ color }) => <TabBarIcon name="magnifying-glass" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="search" color={color} />, // search icon
           tabBarButton: (props) => <HapticTab {...props} />,
         }}
       />
@@ -52,7 +52,7 @@ export default function TabLayout() {
         name="favorites"
         options={{
           title: '',
-          tabBarIcon: ({ color }) => <TabBarIcon name="heart" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="favorite" color={color} />, // favorite icon
           tabBarButton: (props) => <HapticTab {...props} />,
         }}
       />
@@ -60,7 +60,7 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: '',
-          tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="person" color={color} />, // person icon
           tabBarButton: (props) => <HapticTab {...props} />,
         }}
       />

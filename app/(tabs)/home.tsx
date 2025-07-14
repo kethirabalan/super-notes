@@ -1,7 +1,7 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotes } from '@/contexts/NotesContext';
-import Entypo from '@expo/vector-icons/Entypo';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -64,7 +64,7 @@ export default function HomeScreen() {
         />
         <Text style={styles.title}>My Notes</Text>
         {/* <TouchableOpacity>
-        <Entypo name="dots-three-horizontal" color="black" style={styles.menuDots} />
+        <MaterialIcons name="dots-three-horizontal" color="black" style={styles.menuDots} />
         </TouchableOpacity> */}
       </View>
       
@@ -105,7 +105,7 @@ export default function HomeScreen() {
         style={{ marginTop: 10 }}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Entypo name="documents" size={64} color="#6C6C80" />
+            <MaterialIcons name="description" size={64} color="#6C6C80" />
             <Text style={styles.emptyTitle}>No notes yet</Text>
             <Text style={styles.emptySubtitle}>Create your first note to get started</Text>
           </View>

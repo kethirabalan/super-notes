@@ -171,7 +171,7 @@ export default function AuthScreen() {
             disabled={googleLoading || !request}
             style={styles.googleButton}
             contentStyle={styles.googleButtonContent}
-            icon="google"
+            icon={() => <MaterialIcons name="google" size={20} color="#6C63FF" />}
           >
             {googleLoading ? (
               <ActivityIndicator color="#6C63FF" />

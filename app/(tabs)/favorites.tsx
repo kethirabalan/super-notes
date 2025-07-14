@@ -1,5 +1,5 @@
 import { useNotes } from '@/contexts/NotesContext';
-import Entypo from '@expo/vector-icons/Entypo';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -58,7 +58,7 @@ export default function FavoritesScreen() {
           <Text style={styles.subtitle}>{favoriteNotes.length} notes</Text>
         </View>
         {/* <TouchableOpacity>
-          <Entypo name="dots-three-horizontal" color="black" style={styles.menuDots} />
+          <MaterialIcons name="dots-three-horizontal" color="black" style={styles.menuDots} />
         </TouchableOpacity> */}
       </View>
       
@@ -87,7 +87,7 @@ export default function FavoritesScreen() {
                 <View style={{ flex: 1 }}>
                   <View style={styles.titleRow}>
                     <Text style={styles.noteTitle} numberOfLines={1}>{item.title}</Text>
-                    <Entypo name="heart" size={16} color="#FF6B6B" />
+                    <MaterialIcons name="favorite" size={16} color="#FF6B6B" />
                   </View>
                   <Text style={styles.notePreview} numberOfLines={2}>{item.preview}</Text>
                   <View style={styles.noteFooter}>
@@ -102,7 +102,7 @@ export default function FavoritesScreen() {
         style={{ marginTop: 10 }}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Entypo name="heart" size={64} color="#6C6C80" />
+            <MaterialIcons name="favorite" size={64} color="#6C6C80" />
             <Text style={styles.emptyTitle}>No favorite notes</Text>
             <Text style={styles.emptySubtitle}>Add notes to favorites to see them here</Text>
           </View>
