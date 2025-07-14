@@ -1,9 +1,12 @@
 import { useNotes } from '@/contexts/NotesContext';
+import { environment } from '@/environments/environment';
 import Entypo from '@expo/vector-icons/Entypo';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Appbar } from 'react-native-paper';
+
 
 const categories = [
   { id: '1', name: 'Personal', color: '#6C63FF' },
@@ -14,6 +17,9 @@ const categories = [
   { id: '6', name: 'Health', color: '#F38181' },
 ];
 
+const CLOUDINARY_UPLOAD_PRESET = environment.cloudinary.uploadPreset; // TODO: Replace with your Cloudinary upload preset
+const CLOUDINARY_CLOUD_NAME = environment.cloudinary.cloudName; // TODO: Replace with your Cloudinary cloud name
+
 export default function CreateNoteScreen() {
   const router = useRouter();
   const { createNote } = useNotes();
@@ -22,23 +28,82 @@ export default function CreateNoteScreen() {
   const [selectedCategory, setSelectedCategory] = React.useState('Personal');
   const [isFavorite, setIsFavorite] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
+  const [image, setImage] = React.useState<string | null>(null);
+  const [imageFile, setImageFile] = React.useState<File | undefined>(undefined);
+  const [uploading, setUploading] = React.useState(false);
+
+  const pickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert('Permission required', 'Permission to access media library is required!');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: 'images',
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.7,
+    });
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setImage(result.assets[0].uri);
+      setImageFile(result.assets[0].file); // Web: File object
+    }
+  };
+
+  const uploadImageToCloudinary = async (uri: string, fileObj?: File): Promise<string> => {
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      if (fileObj) {
+        // Web: use the File object directly
+        formData.append('file', fileObj);
+      } else if (uri && uri.startsWith('data:')) {
+        // Web fallback: send the full data URL
+        formData.append('file', uri);
+      } else {
+        // Native: file path
+        formData.append('file', {
+          uri,
+          type: 'image/jpeg',
+          name: 'note-image.jpg',
+        } as any);
+      }
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      formData.append('folder', `${environment.cloudinary.folder}/images`);
+      const response = await fetch(environment.cloudinary.uploadEndpoint, {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await response.json();
+      if (!data.secure_url) throw new Error('Cloudinary upload failed');
+      return data.secure_url;
+    } catch (error) {
+      Alert.alert('Image Upload Error', 'Failed to upload image to Cloudinary.');
+      throw error;
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!title.trim() || !content.trim()) {
       Alert.alert('Error', 'Please fill in both title and content');
       return;
     }
-
     setSaving(true);
     try {
+      let imageUrl = '';
+      if (image) {
+        imageUrl = await uploadImageToCloudinary(image, imageFile);
+      }
       const noteData = {
         title: title.trim(),
         content: content.trim(),
         category: selectedCategory,
         tags: [],
         isFavorite,
+        image: imageUrl || undefined,
       };
-
       await createNote(noteData);
       router.back();
     } catch (error) {
@@ -83,11 +148,18 @@ export default function CreateNoteScreen() {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Image Picker */}
-        <TouchableOpacity style={styles.imagePicker}>
-          <View style={styles.imagePlaceholder}>
-            <Entypo name="camera" size={32} color="#6C6C80" />
-            <Text style={styles.imagePlaceholderText}>Add Cover Image</Text>
-          </View>
+        <TouchableOpacity style={styles.imagePicker} onPress={pickImage} disabled={uploading || saving}>
+          {image ? (
+            <View style={styles.imagePlaceholder}>
+              <Entypo name="camera" size={32} color="#6C6C80" style={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }} />
+              <Image source={{ uri: image }} style={{ width: '100%', height: '100%', borderRadius: 16 }} resizeMode="cover" />
+            </View>
+          ) : (
+            <View style={styles.imagePlaceholder}>
+              <Entypo name="camera" size={32} color="#6C6C80" />
+              <Text style={styles.imagePlaceholderText}>Add Cover Image</Text>
+            </View>
+          )}
         </TouchableOpacity>
 
         {/* Title Input */}
