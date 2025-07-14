@@ -1,5 +1,6 @@
 import {
   createUserWithEmailAndPassword,
+  deleteUser,
   User as FirebaseUser,
   GoogleAuthProvider,
   signInWithCredential,
@@ -7,7 +8,7 @@ import {
   signOut,
   updateProfile
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { deleteDoc, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { globalErrorHandler } from '../lib/errorHandler';
 import { auth, db } from '../lib/firebase';
 import { performanceMonitor } from '../lib/performance';
@@ -229,6 +230,25 @@ export class UserService {
       const duration = performanceMonitor.endTimer('get_user_profile', { success: false });
       globalErrorHandler.logError(error, 'UserService.getUserProfile');
       throw new Error('Failed to fetch user profile. Please try again.');
+    }
+  }
+
+  async deleteAccount(userId: string): Promise<void> {
+    performanceMonitor.startTimer('delete_account');
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser || currentUser.uid !== userId) {
+        throw new Error('No authenticated user or mismatched user ID.');
+      }
+      // Delete user document from Firestore
+      await deleteDoc(doc(db, 'users', userId));
+      // Delete user from Firebase Auth
+      await deleteUser(currentUser);
+      performanceMonitor.endTimer('delete_account', { success: true, userId });
+    } catch (error: any) {
+      const duration = performanceMonitor.endTimer('delete_account', { success: false });
+      globalErrorHandler.logError(error, 'UserService.deleteAccount');
+      throw new Error('Failed to delete account. Please try again.');
     }
   }
 

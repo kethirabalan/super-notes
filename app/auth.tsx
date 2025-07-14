@@ -5,7 +5,7 @@ import * as GoogleSignIn from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import React from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Button, Card, Divider } from 'react-native-paper';
+import { Button, Card } from 'react-native-paper';
 
 // Ensure WebBrowser redirects work properly
 WebBrowser.maybeCompleteAuthSession();
@@ -159,7 +159,7 @@ export default function AuthScreen() {
             )}
           </Button>
 
-          <View style={styles.dividerContainer}>
+          {/* <View style={styles.dividerContainer}>
             <Divider style={styles.divider} />
             <Text style={styles.dividerText}>OR</Text>
             <Divider style={styles.divider} />
@@ -178,7 +178,7 @@ export default function AuthScreen() {
             ) : (
               <Text style={styles.googleButtonText}>Continue with Google</Text>
             )}
-          </Button>
+          </Button> */}
           
           <TouchableOpacity
             onPress={() => setIsLogin(!isLogin)}

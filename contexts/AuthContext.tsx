@@ -12,6 +12,7 @@ interface AuthContextType {
   signInWithGoogle: (idToken: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateUserData: (updates: Partial<User>) => Promise<void>;
+  deleteAccount: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,7 +33,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const unsubscribe = userService.onAuthStateChanged(async (firebaseUser) => {
       setUser(firebaseUser);
-      
       if (firebaseUser) {
         try {
           const data = await userService.getUserProfile(firebaseUser.uid);
@@ -43,10 +43,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         setUserData(null);
       }
-      
       setLoading(false);
     });
-
     return unsubscribe;
   }, []);
 
@@ -84,7 +82,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateUserData = async (updates: Partial<User>) => {
     if (!user) throw new Error('No user logged in');
-    
     try {
       await userService.updateProfile(user.uid, updates);
       if (userData) {
@@ -95,7 +92,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const value = {
+  const deleteAccount = async () => {
+    if (!user) throw new Error('No user logged in');
+    try {
+      await userService.deleteAccount(user.uid);
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const value: AuthContextType = {
     user,
     userData,
     loading,
@@ -104,6 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signInWithGoogle,
     signOut,
     updateUserData,
+    deleteAccount,
   };
 
   return (

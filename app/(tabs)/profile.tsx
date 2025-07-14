@@ -7,13 +7,13 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOp
 import { Avatar, Card, Divider, List, Button as PaperButton } from 'react-native-paper';
 
 const settingsOptions = [
-  { title: 'Account Settings', icon: 'user' as const, subtitle: 'Manage your account' },
-  { title: 'Appearance', icon: 'palette' as const, subtitle: 'Theme and display' },
-  { title: 'Notifications', icon: 'bell' as const, subtitle: 'Push notifications' },
-  { title: 'Privacy & Security', icon: 'lock' as const, subtitle: 'Data and privacy' },
-  { title: 'Storage', icon: 'database' as const, subtitle: 'Manage storage space' },
-  { title: 'Help & Support', icon: 'help' as const, subtitle: 'Get help' },
-  { title: 'About', icon: 'info' as const, subtitle: 'App version 1.0.0' },
+  { title: 'Account Settings', icon: 'user' as const, subtitle: 'Manage your account', route: 'settings/AccountSettings' },
+  { title: 'Appearance', icon: 'palette' as const, subtitle: 'Theme and display', route: 'settings/Appearance' },
+  { title: 'Notifications', icon: 'bell' as const, subtitle: 'Push notifications', route: 'settings/Notifications' },
+  { title: 'Privacy & Security', icon: 'lock' as const, subtitle: 'Data and privacy', route: 'settings/PrivacySecurity' },
+  { title: 'Storage', icon: 'database' as const, subtitle: 'Manage storage space', route: 'settings/Storage' },
+  { title: 'Help & Support', icon: 'help' as const, subtitle: 'Get help', route: 'settings/HelpSupport' },
+  { title: 'About', icon: 'info' as const, subtitle: 'App version 1.0.0', route: 'settings/About' },
 ];
 
 function EditProfileScreen({ navigation }: { navigation: { goBack: () => void } }) {
@@ -193,6 +193,7 @@ export default function ProfileScreen() {
               titleStyle={styles.settingTitle}
               descriptionStyle={styles.settingSubtitle}
               style={styles.settingItem}
+              onPress={() => navigation.navigate(option.route as never)}
             />
             {index < settingsOptions.length - 1 && <Divider />}
           </View> 

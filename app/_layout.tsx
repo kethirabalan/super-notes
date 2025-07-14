@@ -27,6 +27,13 @@ function RootLayoutNav() {
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="note/[id]" options={{ headerShown: false }} />
             <Stack.Screen name="create-note" options={{ headerShown: false }} />
+            <Stack.Screen name="settings/AccountSettings" options={{ headerShown: true, title: 'Account Settings' }} />
+            <Stack.Screen name="settings/Appearance" options={{ headerShown: true, title: 'Appearance' }} />
+            <Stack.Screen name="settings/Notifications" options={{ headerShown: true, title: 'Notifications' }} />
+            <Stack.Screen name="settings/PrivacySecurity" options={{ headerShown: true, title: 'Privacy & Security' }} />
+            <Stack.Screen name="settings/Storage" options={{ headerShown: true, title: 'Storage' }} />
+            <Stack.Screen name="settings/HelpSupport" options={{ headerShown: true, title: 'Help & Support' }} />
+            <Stack.Screen name="settings/About" options={{ headerShown: true, title: 'About' }} />
           </>
         ) : (
           <Stack.Screen name="auth" options={{ headerShown: false }} />
