@@ -1,11 +1,13 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { googleSignInConfig } from '@/lib/googleSignIn';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import * as GoogleSignIn from 'expo-auth-session/providers/google';
+import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import React from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Button, Card } from 'react-native-paper';
+import { Button, Card, Divider } from 'react-native-paper';
 
 // Ensure WebBrowser redirects work properly
 WebBrowser.maybeCompleteAuthSession();
@@ -42,13 +44,13 @@ export default function AuthScreen() {
     try {
       if (isLogin) {
         await signIn(email.trim(), password);
+        router.replace('/(tabs)/home');
       } else {
         await signUp(email.trim(), password, name.trim());
       }
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Authentication failed');
     } finally { 
-      navigation.navigate('home' as never);
       setLoading(false);
     }
   };
@@ -65,6 +67,7 @@ export default function AuthScreen() {
         
         if (id_token) {
           await signInWithGoogle(id_token);
+          router.replace('/(tabs)/home');
         } else {
           throw new Error('No ID token received from Google');
         }
@@ -78,7 +81,6 @@ export default function AuthScreen() {
       console.error('Google Sign-In error:', error);
       Alert.alert('Error', 'Google Sign-In failed. Please try again.');
     } finally {
-      navigation.navigate('home' as never);
       setGoogleLoading(false);
     }
   };
@@ -159,7 +161,7 @@ export default function AuthScreen() {
             )}
           </Button>
 
-          {/* <View style={styles.dividerContainer}>
+          <View style={styles.dividerContainer}>
             <Divider style={styles.divider} />
             <Text style={styles.dividerText}>OR</Text>
             <Divider style={styles.divider} />
@@ -171,14 +173,14 @@ export default function AuthScreen() {
             disabled={googleLoading || !request}
             style={styles.googleButton}
             contentStyle={styles.googleButtonContent}
-            icon={() => <MaterialIcons name="google" size={20} color="#6C63FF" />}
+            icon={() => <MaterialIcons name="login" size={20} color="#6C63FF" />}
           >
             {googleLoading ? (
               <ActivityIndicator color="#6C63FF" />
             ) : (
               <Text style={styles.googleButtonText}>Continue with Google</Text>
             )}
-          </Button> */}
+          </Button>
           
           <TouchableOpacity
             onPress={() => setIsLogin(!isLogin)}

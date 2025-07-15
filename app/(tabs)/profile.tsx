@@ -205,7 +205,7 @@ export default function ProfileScreen() {
       </Card>
 
       {/* Logout Button */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+      <TouchableOpacity style={[styles.logoutButton, { marginBottom: 32 }]} onPress={handleLogout}>
         <Entypo name="log-out" size={20} color="#FF6B6B" />
         <Text style={styles.logoutText}>Log Out</Text>
       </TouchableOpacity>

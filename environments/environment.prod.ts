@@ -16,6 +16,10 @@ export const environment = {
     appId: "1:1017757914937:web:49529e7113fd1722b1bae8",
     measurementId: "G-W921JS8RF0"
   },
+  googleOAuth: {
+    clientId: '1017757914937-sbmbjt255qp5k3qoa5i7u22fm015qqbl.apps.googleusercontent.com',
+    redirectUri: 'https://auth.expo.io/@balantvl-org/supernotes'
+  },
   cloudinary: {
     cloudName: 'dpnjqev0i',
     baseUrl: 'https://res.cloudinary.com/dpnjqev0i',
