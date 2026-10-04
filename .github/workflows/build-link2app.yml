@@ -42,12 +42,10 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-apple-darwin, x86_64-apple-darwin
-      - name: Install dependencies
-        run: npm install
-      - name: Build CLI
-        run: npm run cli:build
       - name: Build Mac Packages
-        run: node dist/cli.js "${{ github.event.inputs.url }}" --name "${{ github.event.inputs.app_name }}" --targets "${{ github.event.inputs.mac_targets }}" --app-version "${{ github.event.inputs.version }}"
+        run: |
+          npm install -g pake-cli
+          pake "${{ github.event.inputs.url }}" --name "${{ github.event.inputs.app_name }}" --targets "${{ github.event.inputs.mac_targets }}" --app-version "${{ github.event.inputs.version }}"
       - name: Upload Mac Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -73,12 +71,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
-      - name: Install dependencies
-        run: npm install
-      - name: Build CLI
-        run: npm run cli:build
       - name: Build Linux Packages
-        run: node dist/cli.js "${{ github.event.inputs.url }}" --name "${{ github.event.inputs.app_name }}" --targets "${{ github.event.inputs.linux_targets }}" --app-version "${{ github.event.inputs.version }}"
+        run: |
+          npm install -g pake-cli
+          pake "${{ github.event.inputs.url }}" --name "${{ github.event.inputs.app_name }}" --targets "${{ github.event.inputs.linux_targets }}" --app-version "${{ github.event.inputs.version }}"
       - name: Upload Linux Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -101,12 +97,10 @@ jobs:
           node-version: 20
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
-      - name: Install dependencies
-        run: npm install
-      - name: Build CLI
-        run: npm run cli:build
       - name: Build Windows Packages
-        run: node dist/cli.js "${{ github.event.inputs.url }}" --name "${{ github.event.inputs.app_name }}" --targets "${{ github.event.inputs.win_targets }}" --app-version "${{ github.event.inputs.version }}"
+        run: |
+          npm install -g pake-cli
+          pake "${{ github.event.inputs.url }}" --name "${{ github.event.inputs.app_name }}" --targets "${{ github.event.inputs.win_targets }}" --app-version "${{ github.event.inputs.version }}"
       - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
         with:
