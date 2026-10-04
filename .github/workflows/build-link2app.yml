@@ -1,36 +1,117 @@
-name: Link2App Build
+name: Build Link2App Packages
 on:
   workflow_dispatch:
     inputs:
       url:
+        description: 'Website URL'
         required: true
         type: string
       app_name:
+        description: 'Application Name'
         required: true
         type: string
       version:
+        description: 'Version'
         required: true
+        default: '1.0.0'
         type: string
-      targets:
-        required: true
+      mac_targets:
+        description: 'Mac Targets (comma separated)'
+        required: false
         type: string
-      architecture:
-        required: true
+      linux_targets:
+        description: 'Linux Targets (comma separated)'
+        required: false
         type: string
-      build_id:
-        required: true
+      win_targets:
+        description: 'Windows Targets (comma separated)'
+        required: false
         type: string
 
 jobs:
-  build:
-    strategy:
-      matrix:
-        include:
-          - os: macos-latest
-            targets: dmg,app
-          - os: ubuntu-latest
-            targets: deb,appimage
-    runs-on: ${{ matrix.os }}
+  build-mac:
+    if: ${{ github.event.inputs.mac_targets != '' }}
+    runs-on: macos-latest
     steps:
-      - name: Build
-        run: echo "Building ${{ github.event.inputs.targets }}"
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin, x86_64-apple-darwin
+      - name: Install dependencies
+        run: npm install
+      - name: Build CLI
+        run: npm run cli:build
+      - name: Build Mac Packages
+        run: node dist/cli.js "${{ github.event.inputs.url }}" --name "${{ github.event.inputs.app_name }}" --targets "${{ github.event.inputs.mac_targets }}" --app-version "${{ github.event.inputs.version }}"
+      - name: Upload Mac Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-artifacts
+          path: |
+            *.dmg
+            *.app
+            *.pkg
+          if-no-files-found: ignore
+
+  build-linux:
+    if: ${{ github.event.inputs.linux_targets != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+      - name: Install dependencies
+        run: npm install
+      - name: Build CLI
+        run: npm run cli:build
+      - name: Build Linux Packages
+        run: node dist/cli.js "${{ github.event.inputs.url }}" --name "${{ github.event.inputs.app_name }}" --targets "${{ github.event.inputs.linux_targets }}" --app-version "${{ github.event.inputs.version }}"
+      - name: Upload Linux Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-artifacts
+          path: |
+            *.deb
+            *.AppImage
+            *.flatpak
+            *.snap
+          if-no-files-found: ignore
+
+  build-win:
+    if: ${{ github.event.inputs.win_targets != '' }}
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Install dependencies
+        run: npm install
+      - name: Build CLI
+        run: npm run cli:build
+      - name: Build Windows Packages
+        run: node dist/cli.js "${{ github.event.inputs.url }}" --name "${{ github.event.inputs.app_name }}" --targets "${{ github.event.inputs.win_targets }}" --app-version "${{ github.event.inputs.version }}"
+      - name: Upload Windows Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: win-artifacts
+          path: |
+            *.msi
+            *.msix
+          if-no-files-found: ignore
